@@ -37,7 +37,12 @@
                 fpsLogElement.innerText = fps + 'fps@x' + scale;
             });
 
+            var i = 0;
             motionSensor.on('cluster:change', function (cluster, context) {
+                //if (i++ > 90 && i < 100) {
+                //    console.log(i, cluster);
+                //    throw 'stop';
+                //}
                 // draw a circle around the cluster's centroid
                 context.beginPath();
                 context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
@@ -60,6 +65,7 @@
                 context.stroke();
 
                 // draw cluster bounding ploygon
+/*
                 rp = cluster.points[cluster.boundaryPointIndices[0]];
                 context.beginPath();
                 context.moveTo(rp.x, rp.y);
@@ -72,6 +78,7 @@
                 context.fill();
                 context.stroke();
                 context.closePath();
+*/
             });
 
             motionSensor.start();

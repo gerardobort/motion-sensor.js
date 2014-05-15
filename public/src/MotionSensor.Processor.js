@@ -88,7 +88,7 @@
             if (cluster) {
                 var centroidPixel = new MotionSensor.Pixel(cluster.centroid, cluster.rgbFloat);
                 // ensure we have at leaset three points initially
-                points = points.concat([centroidPixel, centroidPixel, centroidPixel], cluster.boundaryPointIndices.map(function (i) { return cluster.pixels[i]; }));
+                points = points.concat([centroidPixel, centroidPixel, centroidPixel]);//, cluster.boundaryPointIndices.map(function (i) { return cluster.pixels[i]; }));
             }
         }
 
@@ -165,7 +165,7 @@
             if (cluster.boundaryPointIndices && cluster.boundaryPointIndices.length > 0) {
 
                 /// <---
-                var p, nx, ny, dx, dy, q, prevpx, c1, c2, cx = cy = countx = county = 0, maxpx = 30, modulus, versor, pcounter = 0;
+                var p, nx, ny, dx, dy, q, prevpx, c1, c2, cx = cy = countx = county = 0, maxpx = 30, pcounter = 0;
 
                 for (i = 0, l = cluster.points.length; i < l; i++) {
                     x = cluster.points[i].x;
@@ -224,16 +224,19 @@
                     pcounter++;
                 }
 
-                modulus = Math.sqrt(countx*countx + county*county);
-                versor = [-countx/modulus, -county/modulus];
-                cluster.versor = versor;
+                cluster.modulus = Math.sqrt(countx*countx + county*county);
+                if (cluster.modulus) {
+                    cluster.versor.x = -countx/cluster.modulus;
+                    cluster.versor.y = -county/cluster.modulus;
+                } else {
+                    cluster.versor.x = 1;
+                    cluster.versor.y = 0;
+                }
+                cluster.modulus *= (0.03 / this.motionSensor.scale);
 
-                var centroid = cluster.centroid;
                 if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
-                    centroid = [
-                        (cluster.centroid[0] + this.clustersBuffer[j].centroid[0])*0.5,
-                        (cluster.centroid[1] + this.clustersBuffer[j].centroid[1])*0.5
-                    ];
+                    cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
+                    cluster.centroid.y = (cluster.centroid.y + this.clustersBuffer[j].centroid.y)*.5;
                 }
 
                 ///  --->

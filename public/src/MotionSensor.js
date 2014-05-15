@@ -19,8 +19,10 @@
         this.canvasContext = this.canvas.getContext('2d');
 
         // initialize variables
-        if (options.totalBuffers < 3) {
-            throw 'MotionSensor: Wrong setting: totalBuffers must be 3 or higher.';
+        if (options.totalBuffers < 2) {
+            throw 'MotionSensor: Wrong setting: totalBuffers must be 2 or higher.';
+        } else if (options.totalBuffers < 3) {
+            console.log('MotionSensor: Warning: It\'s not possible to compute cluster directions when using 2 buffers.');
         }
         this.imageDataBuffersN = options.totalBuffers;
         this.imageDataBuffers = [];
