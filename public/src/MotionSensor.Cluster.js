@@ -18,8 +18,11 @@
         MotionSensor.Cluster.randomPointColors.push('rgba(' + r + ', ' + g + ', ' + b + ', 0.6)');
     }
 
-    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, totalClusters) {
-        var k = totalClusters,
+    /**
+     * Implements basic K-means algorythm
+     */
+    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K) {
+        var k = K,
             p = O = P = null,
             dMin = d = 0,
             jMin = 0,
