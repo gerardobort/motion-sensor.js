@@ -1,17 +1,12 @@
 ;(function (window, document) {
 
 
-    MotionSensor.Cluster = function(id, centroid, versor, modulus, points, pixels, boundaryPointIndices, acum, rgbFloat, debugColor) {
-        this.id = id;
-        this.centroid = new MotionSensor.Vector2(centroid[0], centroid[1]);
-        this.versor = new MotionSensor.Vector2(versor[0], versor[1]);
-        this.modulus = modulus;
-        this.points = points.map(function (point) { return new MotionSensor.Vector2(point[0], point[1]); });
-        this.pixels = []; // TODO ??
-        this.boundaryPointIndices = boundaryPointIndices;
-        this.acum = acum;
-        this.rgbFloat = new MotionSensor.Vector3(rgbFloat);
-        this.debugColor = debugColor;
+    MotionSensor.Cluster = function(options) {
+        for (k in options) {
+          if (options.hasOwnProperty(k)) {
+             this[k] = options[k];
+          }
+        };
     };
 
     MotionSensor.Cluster.randomPointColors = [];
@@ -40,18 +35,18 @@
                     if (!previousClusters[j]) {
                         x = parseInt(Math.random()*VIDEO_WIDTH, 10);
                         y = parseInt(Math.random()*VIDEO_HEIGHT, 10);
-                        clusters.push(new MotionSensor.Cluster(
-                            j,
-                            [x, y],
-                            [1, 0],
-                            0,
-                            [],
-                            [],
-                            [],
-                            [0,0],
-                            [0,0,0],
-                            MotionSensor.Cluster.randomPointColors[j]
-                        ));
+                        clusters.push(new MotionSensor.Cluster({
+                            id: j,
+                            centroid: new MotionSensor.Vector2(x, y),
+                            versor: new MotionSensor.Vector2(1, 0),
+                            modulus: 0,
+                            points: [],
+                            pixels: [],
+                            boundaryPointIndices: [],
+                            acum: [0, 0],
+                            rgbFloat: new MotionSensor.Vector3(0, 0, 0),
+                            debugColor: MotionSensor.Cluster.randomPointColors[j]
+                        }));
                     } else {
                         clusters.push(previousClusters[j]);
                     }
