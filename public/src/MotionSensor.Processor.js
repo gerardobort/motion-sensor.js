@@ -85,7 +85,7 @@
         ctx.putImageData(imageDataBuffers[imageDataBuffersN-1], 0, 0);
 
 
-        for (var j = 0; j < k; j++) {
+        for (var j = 0, k = clusters.length; j < k; j++) {
             var cluster = clusters[j];
 
             if (cluster.points.length < 3) { 
