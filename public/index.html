@@ -24,9 +24,9 @@
             var fpsLogElement = document.getElementById('fps-log');
 
             var motionSensor = new MotionSensor({
-                initialScale: 0.5,
+                initialScale: 1,
                 totalBuffers: 3,
-                totalClusters: 20,
+                totalClusters: 30,
                 fpsControlEnabled: false,
                 useDatGui: false,
                 regions: [] // a way to delimit the areas to check collission and improve performance
@@ -49,13 +49,7 @@
 
                     // draw a circle around the cluster's centroid
                     context.beginPath();
-                    var maxDistance = 0, d;
-                    cluster.points.forEach(function (point) {
-                        if ((d = cluster.centroid.getDistance(point)) > maxDistance) {
-                            maxDistance = d;
-                        }
-                    });
-                    context.arc(cluster.centroid.x, cluster.centroid.y, level*(maxDistance/10), 0, 2 * Math.PI, false);
+                    context.arc(cluster.centroid.x, cluster.centroid.y, level*6, 0, 2 * Math.PI, false);
                     context.fillStyle = cluster.debugColor;
                     context.fill();
                     context.lineWidth = 0;

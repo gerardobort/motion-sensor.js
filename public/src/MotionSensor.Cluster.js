@@ -37,7 +37,7 @@
     /**
      * Implements basic K-means algorythm
      */
-    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor) {
+    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor, level) {
         var k = K,
             p = O = P = null,
             dMin = d = 0,
@@ -48,8 +48,8 @@
             maxDelta = 70,
             w = VIDEO_WIDTH = motionSensor.VIDEO_WIDTH,
             h = VIDEO_HEIGHT = motionSensor.VIDEO_HEIGHT;
-//if(k==1)
-//console.log(points.map(function (p) { return p.position.x + ',' + p.position.y; }).join(';\n'), K);
+
+        var x,y,z,t;
 
         var cluster, j;
         for (j = 0; j < k; j++) {
@@ -68,9 +68,13 @@
                     if (!previousClusters[j]) {
                         x = Math.floor(Math.random()*VIDEO_WIDTH);
                         y = Math.floor(Math.random()*VIDEO_HEIGHT);
+                        if (2 === level) {
+                          z = Math.floor(Math.random());
+                          t = Math.floor(Math.random());
+                        }
                         clusters.push(new MotionSensor.Cluster({
                             id: j,
-                            centroid: new MotionSensor.Vector2(x, y),
+                            centroid: (level !== 2 ? new MotionSensor.Vector2(x, y) : new MotionSensor.Vector4(x, y, z, t)),
                             versor: new MotionSensor.Vector2(1, 0),
                             modulus: 0,
                             points: [],

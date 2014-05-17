@@ -179,7 +179,7 @@
         if (this.i > 30) {
             this.superPoints = this.clustersBuffer.map(function (c) {
                 return new MotionSensor.Pixel(
-                    new MotionSensor.Vector2(c.centroid.x, c.centroid.y),
+                    new MotionSensor.Vector4(c.centroid.x, c.centroid.y, c.versor.x*c.modulus, c.versor.y*c.modulus),
                     new MotionSensor.Vector3(
                         Math.floor(c.rgbFloat.x),
                         Math.floor(c.rgbFloat.y),
@@ -189,7 +189,7 @@
             });
 
 
-            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 2, this.motionSensor);
+            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 2, this.motionSensor, 2);
 
             var processor = this;
             this.superClustersBuffer.forEach(function (cluster) {
