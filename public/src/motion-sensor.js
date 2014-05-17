@@ -1,20 +1,21 @@
 ;(function (window, document) {
 
-    var VIDEO_WIDTH = 2*320,
-        VIDEO_HEIGHT = 2*160;
-
     var MotionSensor = function (options) {
         this.options = options;
 
+        this.VIDEO_WIDTH = .5*320;
+        this.VIDEO_HEIGHT = .5*240;
+
         this.canvas = document.createElement('canvas');
-        this.canvas.width = VIDEO_WIDTH;
-        this.canvas.height = VIDEO_HEIGHT;
+        this.canvas.width = this.VIDEO_WIDTH;
+        this.canvas.height = this.VIDEO_HEIGHT;
         this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
 
         this.video = document.createElement('video');
-        this.video.width = VIDEO_WIDTH;
-        this.video.height = VIDEO_HEIGHT;
+        this.video.width = this.VIDEO_WIDTH;
+        this.video.height = this.VIDEO_HEIGHT;
         this.video.autoplay = 'true';
+        this.video.style.display = 'none';
 
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
@@ -29,7 +30,7 @@
         this.imageDataBuffersN = options.totalBuffers;
         this.imageDataBuffers = [];
         for (var i = 0, l = this.imageDataBuffersN; i < l; i++) {
-            this.imageDataBuffers.push(this.canvasContext.createImageData(VIDEO_WIDTH, VIDEO_HEIGHT));
+            this.imageDataBuffers.push(this.canvasContext.createImageData(this.VIDEO_WIDTH, this.VIDEO_HEIGHT));
         }
 
         this.attachedEvents = {};
@@ -56,14 +57,14 @@
 
     MotionSensor.prototype.updateCanvas = function () {
         var instance = this;
-        instance.canvasContext.drawImage(instance.video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-        instance.originalImageData = instance.canvasContext.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+        instance.canvasContext.drawImage(instance.video, 0, 0, this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
+        instance.originalImageData = instance.canvasContext.getImageData(0, 0, this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
 
         // shift imageDataBuffers and store the last one
         for (var i = 0, l = instance.imageDataBuffersN-1; i < l; i++) {
             instance.imageDataBuffers[i] = instance.imageDataBuffers[i+1];
         }
-        instance.imageDataBuffers[l] = instance.canvasContext.createImageData(VIDEO_WIDTH, VIDEO_HEIGHT);
+        instance.imageDataBuffers[l] = instance.canvasContext.createImageData(this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
         instance.imageDataBuffers[l].data.set(instance.originalImageData.data);
 
         instance.processor.processCircularBuffer(instance.originalImageData, instance.imageDataBuffers);
@@ -128,7 +129,9 @@
             MOTION_ALPHA_THRESHOLD = 120,
             alpha = 0,
             gamma = 3,
-            i = l = x = y = 0, w = VIDEO_WIDTH, h = VIDEO_HEIGHT;
+            i = l = x = y = 0,
+            w = VIDEO_WIDTH = this.motionSensor.VIDEO_WIDTH,
+            h = VIDEO_HEIGHT = this.motionSensor.VIDEO_HEIGHT;
 
         var k = this.motionSensor.options.totalClusters,
             p = o = null,
@@ -138,7 +141,7 @@
             clusters = [],
             step = 0,
             maxSteps = 3,
-            maxDelta = 30;
+            maxDelta = 70;
 
         // iterate through the main buffer and calculate the differences with previous
         for (i = 0; i < len; i += 4) {
