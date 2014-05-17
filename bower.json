@@ -1,0 +1,31 @@
+{
+  "name": "motion-sensor.js",
+  "version": "0.0.1",
+  "homepage": "https://github.com/gerardobort/motion-sensor.js",
+  "authors": [
+    "Gerardo Bort <gerardobort@gmail.com>"
+  ],
+  "description": "Uses HTML5 getUserMedia() to detect multi-segment motion.",
+  "main": "public/motion-sensor.js",
+  "keywords": [
+    "webcam",
+    "motion",
+    "detection",
+    "clusters",
+    "k-means",
+    "graham",
+    "scan",
+    "events"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "public/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+  }
+}

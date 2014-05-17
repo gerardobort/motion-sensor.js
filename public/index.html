@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Motion Sensor</title>
+    </head>
+    <body>
+
+        <h1>Motion Sensor Example</h1>
+
+        <script src="src/motion-sensor.js"></script>
+
+        <script>
+            var motionSensor = new MotionSensor({
+                totalBuffers: 3,
+                totalClusters: 4,
+                useDatGui: false,
+                regions: [] // a way to delimit the areas to check collission and improve performance
+            });
+
+            motionSensor.on('start', function (canvas, context) {
+            });
+
+            motionSensor.on('cluster:change', function (cluster, context) {
+                // draw a circle around the cluster's centroid
+                context.beginPath();
+                context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
+                context.fillStyle = cluster.debugColor;
+                context.fill();
+                context.lineWidth = 0;
+                context.strokeStyle = cluster.debugColor;
+                context.stroke();
+
+                // draw a representation of the cluster's direction
+                context.beginPath();
+                context.moveTo(cluster.centroid.x, cluster.centroid.y);
+                context.lineTo(
+                    cluster.centroid.x + cluster.versor.x * cluster.modulus,
+                    cluster.centroid.y + cluster.versor.y * cluster.modulus
+                );
+                context.closePath();
+                context.lineWidth = 2;
+                context.strokeStyle = cluster.debugColor;
+                context.stroke();
+
+                // draw cluster bounding ploygon
+                if (rp = cluster.points[cluster.boundaryPointIndices[0]]) {
+                    context.beginPath();
+                    context.moveTo(rp[0], rp[1]);
+                    context.fillStyle = cluster.debugColor;
+                    context.strokeStyle = "rgba(100, 100, 100, 0)";
+                    for (i = 1, l = cluster.boundaryPointIndices.length; i < l; i++) {
+                        rp = cluster.points[cluster.boundaryPointIndices[i]];
+                        context.lineTo(rp[0], rp[1]);
+                    }
+                    context.fill();
+                    context.stroke();
+                    context.closePath();
+                }
+            });
+
+            motionSensor.start();
+
+        </script>
+
+    </body>
+</html>
+
