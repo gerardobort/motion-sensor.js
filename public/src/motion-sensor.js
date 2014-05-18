@@ -11,19 +11,14 @@
     var MotionSensor = function (options) {
         this.options = options;
 
-        this.VIDEO_WIDTH = .5*320;
-        this.VIDEO_HEIGHT = .5*240;
-
         this.canvas = document.createElement('canvas');
-        this.canvas.width = this.VIDEO_WIDTH;
-        this.canvas.height = this.VIDEO_HEIGHT;
         this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
 
         this.video = document.createElement('video');
-        this.video.width = this.VIDEO_WIDTH;
-        this.video.height = this.VIDEO_HEIGHT;
         this.video.autoplay = 'true';
         this.video.style.display = 'none';
+
+        this.setScale(.5);
 
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
@@ -42,6 +37,7 @@
         }
 
         this.attachedEvents = {};
+        this.performanceController = new this.PerformanceController(this);
     };
 
     MotionSensor.prototype.start = function () {
@@ -63,6 +59,17 @@
         );
     };
 
+    MotionSensor.prototype.setScale = function (scale) {
+        this.scale = scale;
+        this.VIDEO_WIDTH = this.scale*640;
+        this.VIDEO_HEIGHT = this.scale*480;
+
+        this.canvas.width = this.VIDEO_WIDTH;
+        this.canvas.height = this.VIDEO_HEIGHT;
+        this.video.width = this.VIDEO_WIDTH;
+        this.video.height = this.VIDEO_HEIGHT;
+    };
+
     MotionSensor.prototype.updateCanvas = function () {
         var instance = this;
         instance.canvasContext.drawImage(instance.video, 0, 0, this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
@@ -76,7 +83,9 @@
         instance.imageDataBuffers[l].data.set(instance.originalImageData.data);
 
         instance.processor.processCircularBuffer(instance.originalImageData, instance.imageDataBuffers);
-        //instance.canvasContext.putImageData(instance.imageDataBuffers[l], 0, 0);
+
+        instance.performanceController.setFrameMark();
+        instance.performanceController.control();
 
         // do while 1
         webkitRequestAnimationFrame(instance.updateCanvas.bind(instance));
@@ -97,6 +106,55 @@
             if (false === this.attachedEvents[eventName][i].apply(params[0]||this, params)) {
                 return;
             }
+        }
+    };
+
+    MotionSensor.prototype.PerformanceController = function (motionSensor) {
+        this.motionSensor = motionSensor;
+        this.timeMarksN = 60;
+        this.timeMarks = [0, 0, 0, 0, 0, 0];
+        this.votes = 0;
+        this.EXPECTED_FPS = 30;
+        this.fpsByScale = {};
+    };
+    MotionSensor.prototype.PerformanceController.prototype.setFrameMark = function () {
+        for (var i = 0, l = this.timeMarksN-1; i < l; i++) {
+            this.timeMarks[i] = this.timeMarks[i+1];
+        }
+        this.timeMarks[this.timeMarksN-1] = Date.now();
+    };
+    MotionSensor.prototype.PerformanceController.prototype.getFPS = function () {
+        var dFrame = 0;
+        for (var i = 0, l = this.timeMarksN-1; i < l; i++) {
+            dFrame += (this.timeMarks[i+1] - this.timeMarks[i])/1000/l;
+        }
+        fps = Math.floor(1/dFrame*100)/100;
+        this.fpsByScale[this.motionSensor.scale.toString()] = fps;
+        return fps;
+    };
+    MotionSensor.prototype.PerformanceController.prototype.control = function () {
+        var fps = this.getFPS();
+        fps < this.EXPECTED_FPS ? this.votes-- : this.votes++;
+        document.title = fps + 'fps@x' + this.motionSensor.scale;
+
+        if (!this.motionSensor.options.fpsControlEnabled) {
+            return;
+        }
+
+        var newScale;
+        if (this.votes < -90) {
+            newScale = this.motionSensor.scale - .25;
+        } else if (this.votes > 90) {
+            newScale = this.motionSensor.scale + .25;
+        }
+        if (newScale
+            && !this.fpsByScale[newScale]
+            || Math.abs(this.fpsByScale[newScale] - this.EXPECTED_FPS) 
+                < Math.abs(this.fpsByScale[this.motionSensor.scale] - this.EXPECTED_FPS)
+            ) {
+            console.log('MotionSensor: switch to scale', newScale, ' - fps map', this.fpsByScale);
+            this.motionSensor.setScale(newScale);
+            this.votes = 0;
         }
     };
 
@@ -195,14 +253,14 @@
                     if (!this.clustersBuffer[j]) {
                         x = parseInt(Math.random()*VIDEO_WIDTH, 10);
                         y = parseInt(Math.random()*VIDEO_HEIGHT, 10);
-                        //clusters.push([x, y, [], [], 0, 0, [0, 0, 0], true, [1, 0]]); // x, y, innerPointsVec, innerPointsObj, mx, my, rgbFloatColor, visible, versor
                         clusters.push({
                             centroid: [x, y],
                             innerPoints: [],
                             acum: [0, 0],
                             rgbFloat: [0, 0, 0],
                             visible: true,
-                            versor: [1, 0]
+                            versor: [1, 0],
+                            boundaryPointIndices: []
                         });
                     } else {
                         clusters.push(this.clustersBuffer[j]);
@@ -218,6 +276,7 @@
                     clusters[j].rgbFloat = [0, 0, 0];
                     clusters[j].visible = true;
                     clusters[j].versor = [1, 0];
+                    clusters[j].boundaryPointIndices = [];
                 }
             }
 
@@ -246,16 +305,19 @@
         }
 
         for (var j = 0; j < k; j++) {
-            var rpoints = clusters[j].innerPoints;
+            var cluster = clusters[j];
+            var rpoints = cluster.innerPoints;
             if (rpoints.length < 14/GRID_FACTOR) {
-                clusters[j].visible = false;
+                cluster.visible = false;
                 //continue;
             }
-            clusters[j].visible = true;
+            cluster.visible = true;
 
             // draw object hulls
-            var boundaryPointIndices = this.convexHull.getGrahamScanPointIndices(rpoints);
-            if (boundaryPointIndices && boundaryPointIndices.length > 0) {
+            if (rpoints.length >= 3) { 
+                cluster.boundaryPointIndices = this.convexHull.getGrahamScanPointIndices(rpoints);
+            }
+            if (cluster.boundaryPointIndices && cluster.boundaryPointIndices.length > 0) {
 
                 /// <---
                 var p, nx, ny, dx, dy, q, prevpx, c1, c2, cx = cy = countx = county = 0, maxpx = 30, modulus, versor, pcounter = 0;
@@ -319,27 +381,28 @@
 
                 modulus = Math.sqrt(countx*countx + county*county);
                 versor = [-countx/modulus, -county/modulus];
-                clusters[j].versor = versor;
+                cluster.versor = versor;
 
-                var centroid = clusters[j].centroid;
+                var centroid = cluster.centroid;
                 if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
                     centroid = [
-                        (clusters[j].centroid[0] + this.clustersBuffer[j].centroid[0])*0.5,
-                        (clusters[j].centroid[1] + this.clustersBuffer[j].centroid[1])*0.5
+                        (cluster.centroid[0] + this.clustersBuffer[j].centroid[0])*0.5,
+                        (cluster.centroid[1] + this.clustersBuffer[j].centroid[1])*0.5
                     ];
                 }
-            
+
+                ///  --->
+                this.clustersBuffer[j] = cluster; // update buffer
+            }
+
+            if (cluster.innerPoints) {
                 this.motionSensor.trigger('cluster:change', [
                     new MotionSensor.Cluster(
-                        j, centroid, versor, modulus * 0.02 * (GRID_FACTOR/4), 
-                        rpoints, boundaryPointIndices, this.randomPointColors[j]
+                        j, cluster.centroid, cluster.versor, cluster.modulus * 0.02 * (GRID_FACTOR/4), 
+                        cluster.innerPoints, cluster.boundaryPointIndices, this.randomPointColors[j]
                     ),
                     this.context
                 ]);
-
-                ///  --->
-                this.clustersBuffer[j] = clusters[j]; // update buffer
-
             }
         }
     };
@@ -397,7 +460,7 @@
         this.getGrahamScanPointIndices = function (_points) {
             this.indices = [];
             if (_points.length < 3) {
-                return _points;
+                return;
             }
             this.points = _points;
                 
