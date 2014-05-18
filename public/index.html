@@ -47,12 +47,12 @@
                 // draw cluster bounding ploygon
                 if (rp = cluster.points[cluster.boundaryPointIndices[0]]) {
                     context.beginPath();
-                    context.moveTo(rp[0], rp[1]);
+                    context.moveTo(rp.x, rp.y);
                     context.fillStyle = cluster.debugColor;
                     context.strokeStyle = "rgba(100, 100, 100, 0)";
                     for (i = 1, l = cluster.boundaryPointIndices.length; i < l; i++) {
                         rp = cluster.points[cluster.boundaryPointIndices[i]];
-                        context.lineTo(rp[0], rp[1]);
+                        context.lineTo(rp.x, rp.y);
                     }
                     context.fill();
                     context.stroke();
