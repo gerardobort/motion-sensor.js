@@ -200,7 +200,7 @@
             h = VIDEO_HEIGHT = this.motionSensor.VIDEO_HEIGHT;
 
         var k = this.motionSensor.options.totalClusters,
-            p = o = null,
+            p = O = P = null,
             dMin = d = 0,
             jMin = 0,
             points = [],
@@ -222,18 +222,21 @@
             x = (i/4) % w;
             y = parseInt((i/4) / w);
             if (this.i > imageDataBuffersN && (!(x % GRID_FACTOR) && !(y % GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                newpx[i+3] = parseInt(alpha, 10); // debug
-                points.push([x, y, [ newpx[i+0], newpx[i+1], newpx[i+2] ]]);
+                //newpx[i+3] = parseInt(alpha, 10); // debug
+                points.push(
+                    new MotionSensor.Pixel(
+                        new MotionSensor.Vector2(x, y),
+                        new MotionSensor.Vector3(newpx[i+0], newpx[i+1], newpx[i+2])
+                    )
+                );
             }
         }
 
         // remember buffered object coordinates
         for (j = 0; j < k; j++) {
             if (this.clustersBuffer[j]) {
-                points.push([
-                    this.clustersBuffer[j].centroid[0],
-                    this.clustersBuffer[j].centroid[1],
-                    this.clustersBuffer[j].rgbFloat]
+                points.push(
+                    new MotionSensor.Pixel(this.clustersBuffer[j].centroid, this.clustersBuffer[j].rgbFloat)
                 );
             }
         }
@@ -253,30 +256,27 @@
                     if (!this.clustersBuffer[j]) {
                         x = parseInt(Math.random()*VIDEO_WIDTH, 10);
                         y = parseInt(Math.random()*VIDEO_HEIGHT, 10);
-                        clusters.push({
-                            centroid: [x, y],
-                            innerPoints: [],
-                            acum: [0, 0],
-                            rgbFloat: [0, 0, 0],
-                            visible: true,
-                            versor: [1, 0],
-                            boundaryPointIndices: []
-                        });
+                        clusters.push(new MotionSensor.Cluster(
+                            j,
+                            [x, y],
+                            [1, 0],
+                            0,
+                            [],
+                            [],
+                            [0,0],
+                            [0,0,0],
+                            this.randomPointColors[j]
+                        ));
                     } else {
                         clusters.push(this.clustersBuffer[j]);
                     }
                 } else {
                     // re-assign cluster x,y
-                    clusters[j].centroid = [
-                        clusters[j].acum[0]/clusters[j].innerPoints.length,
-                        clusters[j].acum[1]/clusters[j].innerPoints.length,
-                    ];
-                    clusters[j].innerPoints = [];
-                    clusters[j].acum = [0, 0];
-                    clusters[j].rgbFloat = [0, 0, 0];
-                    clusters[j].visible = true;
-                    clusters[j].versor = [1, 0];
+                    clusters[j].centroid.x = clusters[j].acum[0]/clusters[j].points.length;
+                    clusters[j].centroid.y = clusters[j].acum[1]/clusters[j].points.length;
+                    clusters[j].points = [];
                     clusters[j].boundaryPointIndices = [];
+                    clusters[j].acum = [0, 0];
                 }
             }
 
@@ -285,46 +285,41 @@
                 dMin = Number.MAX_VALUE;
                 jMin = 0;
                 for (j = 0; j < k; j++) {
-                    o = clusters[j].centroid;
-                    if ((d = distance2(p, o, 0)) < dMin) {
+                    O = [clusters[j].centroid.x, clusters[j].centroid.y];
+                    P = [p.position.x, p.position.y];
+                    if ((d = distance2(O, P, 0)) < dMin) {
                         dMin = d;
                         jMin = j;
                     }
                 }
                 if ((step !== maxSteps-1 || dMin < maxDelta) && clusters[jMin]) {
-                    clusters[jMin].innerPoints.push(p);
-                    clusters[jMin].acum[0] += p[0];
-                    clusters[jMin].acum[1] += p[1];
+                    clusters[jMin].points.push(p.position);
+                    clusters[jMin].acum[0] += p.position.x;
+                    clusters[jMin].acum[1] += p.position.y;
                 } else if (step < maxSteps) {
                     // means color
-                    clusters[jMin].rgbFloat[0] += p[2][0]/l;
-                    clusters[jMin].rgbFloat[1] += p[2][1]/l;
-                    clusters[jMin].rgbFloat[2] += p[2][2]/l;
+                    clusters[jMin].rgbFloat[0] += p.color.x/l;
+                    clusters[jMin].rgbFloat[1] += p.color.y/l;
+                    clusters[jMin].rgbFloat[2] += p.color.z/l;
                 }
             }
         }
 
         for (var j = 0; j < k; j++) {
             var cluster = clusters[j];
-            var rpoints = cluster.innerPoints;
-            if (rpoints.length < 14/GRID_FACTOR) {
-                cluster.visible = false;
-                //continue;
-            }
-            cluster.visible = true;
 
             // draw object hulls
-            if (rpoints.length >= 3) { 
-                cluster.boundaryPointIndices = this.convexHull.getGrahamScanPointIndices(rpoints);
+            if (cluster.points.length >= 3) { 
+                cluster.boundaryPointIndices = this.convexHull.getGrahamScanPointIndices(cluster.points);
             }
             if (cluster.boundaryPointIndices && cluster.boundaryPointIndices.length > 0) {
 
                 /// <---
                 var p, nx, ny, dx, dy, q, prevpx, c1, c2, cx = cy = countx = county = 0, maxpx = 30, modulus, versor, pcounter = 0;
 
-                for (i = 0, l = rpoints.length; i < l; i++) {
-                    x = rpoints[i][0];
-                    y = rpoints[i][1];
+                for (i = 0, l = cluster.points.length; i < l; i++) {
+                    x = cluster.points[i].x;
+                    y = cluster.points[i].y;
 
                     prevpx = imageDataBuffers[imageDataBuffersN-2].data;
                     lastpx = imageDataBuffers[imageDataBuffersN-1].data;
@@ -395,12 +390,9 @@
                 this.clustersBuffer[j] = cluster; // update buffer
             }
 
-            if (cluster.innerPoints) {
+            if (cluster.points) {
                 this.motionSensor.trigger('cluster:change', [
-                    new MotionSensor.Cluster(
-                        j, cluster.centroid, cluster.versor, cluster.modulus * 0.02 * (GRID_FACTOR/4), 
-                        cluster.innerPoints, cluster.boundaryPointIndices, this.randomPointColors[j]
-                    ),
+                    cluster,
                     this.context
                 ]);
             }
@@ -423,13 +415,15 @@
         this.color = v3Color;
     };
 
-    MotionSensor.Cluster = function(id, centroid, versor, modulus, points, boundaryPointIndices, debugColor) {
+    MotionSensor.Cluster = function(id, centroid, versor, modulus, points, boundaryPointIndices, acum, rgbFloat, debugColor) {
         this.id = id;
         this.centroid = new MotionSensor.Vector2(centroid[0], centroid[1]);
         this.versor = new MotionSensor.Vector2(versor[0], versor[1]);
         this.modulus = modulus;
         this.points = points.map(function (point) { return new MotionSensor.Vector2(point[0], point[1]); });
         this.boundaryPointIndices = boundaryPointIndices;
+        this.acum = acum;
+        this.rgbFloat = new MotionSensor.Vector3(rgbFloat);
         this.debugColor = debugColor;
     };
 
@@ -439,21 +433,21 @@
                 return; // horrible bugfix
             }
             return (
-                (this.points[p2][0] - this.points[p1][0]) * (this.points[p3][1] - this.points[p1][1])
-                - (this.points[p2][1] - this.points[p1][1]) * (this.points[p3][0] - this.points[p1][0]
+                (this.points[p2].x - this.points[p1].x) * (this.points[p3].y - this.points[p1].y)
+                - (this.points[p2].y - this.points[p1].y) * (this.points[p3].x - this.points[p1].x
             ));
         }
         
         this.angle = function (o, a) {
             return Math.atan(
-                (this.points[a][1]-this.points[o][1]) / (this.points[a][0] - this.points[o][0])
+                (this.points[a].y-this.points[o].y) / (this.points[a].x - this.points[o].x)
             );
         }
         
         this.distance = function (a, b) {
             return (
-                (this.points[b][0]-this.points[a][0]) * (this.points[b][0]-this.points[a][0])
-                + (this.points[b][1]-this.points[a][1]) * (this.points[b][1]-this.points[a][1])
+                (this.points[b].x-this.points[a].x) * (this.points[b].x-this.points[a].x)
+                + (this.points[b].y-this.points[a].y) * (this.points[b].y-this.points[a].y)
             );
         }
         
@@ -467,11 +461,11 @@
             // Find the lowest point
             var min = 0;
             for (var i = 1; i < this.points.length; i++) {
-                if (this.points[i][1] == this.points[min][1]) {
-                    if (this.points[i][0] < this.points[min][0]) {
+                if (this.points[i].y == this.points[min].y) {
+                    if (this.points[i].x < this.points[min].x) {
                         min = i;
                     }
-                } else if (this.points[i][1] < this.points[min][1]) {
+                } else if (this.points[i].y < this.points[min].y) {
                     min = i;
                 }
             }
