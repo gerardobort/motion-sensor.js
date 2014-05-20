@@ -14,5 +14,17 @@
         this.debugColor = debugColor;
     };
 
+    var swapProp = function (a, b, prop) {
+        var tmpVal = a[prop];
+        a[prop] = b[prop];
+        b[prop] = tmpVal;
+    };
+    MotionSensor.Cluster.prototype.swap = function (cluster) {
+        swapProp(this, cluster, 'centroid');
+        swapProp(this, cluster, 'points');
+        swapProp(this, cluster, 'pixels');
+        swapProp(this, cluster, 'boundaryPointIndices');
+    };
+
 
 }(window, document));

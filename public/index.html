@@ -17,7 +17,7 @@
         <script src="src/MotionSensor.Processor.js"></script>
         <script src="src/MotionSensor.ConvexHull.js"></script>
 
-        <style> xcanvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; } </style>
+        <style> canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; } </style>
 
         <script>
             var fpsLogElement = document.getElementById('fps-log');
@@ -25,7 +25,7 @@
             var motionSensor = new MotionSensor({
                 totalBuffers: 3,
                 totalClusters: 20,
-                fpsControlEnabled: true,
+                fpsControlEnabled: false,
                 useDatGui: false,
                 regions: [] // a way to delimit the areas to check collission and improve performance
             });
@@ -37,48 +37,45 @@
                 fpsLogElement.innerText = fps + 'fps@x' + scale;
             });
 
-            var i = 0;
-            motionSensor.on('cluster:change', function (cluster, context) {
-                //if (i++ > 90 && i < 100) {
-                //    console.log(i, cluster);
-                //    throw 'stop';
-                //}
-                // draw a circle around the cluster's centroid
-                context.beginPath();
-                context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
-                context.fillStyle = cluster.debugColor;
-                context.fill();
-                context.lineWidth = 0;
-                context.strokeStyle = cluster.debugColor;
-                context.stroke();
+            motionSensor.on('processor:compute', function (clusters, context) {
+                clusters.forEach(function (cluster) {
+                    // draw a circle around the cluster's centroid
+                    context.beginPath();
+                    context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
+                    context.fillStyle = cluster.debugColor;
+                    context.fill();
+                    context.lineWidth = 0;
+                    context.strokeStyle = cluster.debugColor;
+                    context.stroke();
 
-                // draw a representation of the cluster's direction
-                context.beginPath();
-                context.moveTo(cluster.centroid.x, cluster.centroid.y);
-                context.lineTo(
-                    cluster.centroid.x + cluster.versor.x * cluster.modulus,
-                    cluster.centroid.y + cluster.versor.y * cluster.modulus
-                );
-                context.closePath();
-                context.lineWidth = 2;
-                context.strokeStyle = cluster.debugColor;
-                context.stroke();
+                    // draw a representation of the cluster's direction
+                    context.beginPath();
+                    context.moveTo(cluster.centroid.x, cluster.centroid.y);
+                    context.lineTo(
+                        cluster.centroid.x + cluster.versor.x * cluster.modulus,
+                        cluster.centroid.y + cluster.versor.y * cluster.modulus
+                    );
+                    context.closePath();
+                    context.lineWidth = 2;
+                    context.strokeStyle = cluster.debugColor;
+                    context.stroke();
 
-                // draw cluster bounding ploygon
-/*
-                rp = cluster.points[cluster.boundaryPointIndices[0]];
-                context.beginPath();
-                context.moveTo(rp.x, rp.y);
-                context.fillStyle = cluster.debugColor;
-                context.strokeStyle = "rgba(100, 100, 100, 0)";
-                for (i = 1, l = cluster.boundaryPointIndices.length; i < l; i++) {
-                    rp = cluster.points[cluster.boundaryPointIndices[i]];
-                    context.lineTo(rp.x, rp.y);
-                }
-                context.fill();
-                context.stroke();
-                context.closePath();
-*/
+                    // draw cluster bounding ploygon
+    /*
+                    rp = cluster.points[cluster.boundaryPointIndices[0]];
+                    context.beginPath();
+                    context.moveTo(rp.x, rp.y);
+                    context.fillStyle = cluster.debugColor;
+                    context.strokeStyle = "rgba(100, 100, 100, 0)";
+                    for (i = 1, l = cluster.boundaryPointIndices.length; i < l; i++) {
+                        rp = cluster.points[cluster.boundaryPointIndices[i]];
+                        context.lineTo(rp.x, rp.y);
+                    }
+                    context.fill();
+                    context.stroke();
+                    context.closePath();
+    */
+                });
             });
 
             motionSensor.start();

@@ -10,7 +10,7 @@
         this.video.autoplay = 'true';
         this.video.style.display = 'none';
 
-        this.setScale(.5);
+        this.setScale(.35);
 
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);

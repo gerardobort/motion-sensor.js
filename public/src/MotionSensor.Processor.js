@@ -242,12 +242,34 @@
                 ///  --->
                 this.clustersBuffer[j] = cluster; // update buffer
             }
-
-            this.motionSensor.trigger('cluster:change', [
-                cluster,
-                this.context
-            ]);
         }
+
+        // collide and swap clusters
+        /*
+        var tmpCluster, tmpCentroid;
+        for (var j = 0; j < k; j++) {
+            for (var z = 0; z < j; z++) {
+                if (this.i < 60) {
+                    continue;
+                }
+                if (tmpCluster = this.clustersBuffer[j]) {
+                    tmpCentroid = new MotionSensor.Vector2(
+                        tmpCluster.centroid.x + tmpCluster.versor.x * tmpCluster.modulus,
+                        tmpCluster.centroid.y + tmpCluster.versor.y * tmpCluster.modulus
+                    );
+                    if (this.clustersBuffer[z].centroid.getDistance(tmpCentroid) < 16) {
+                        console.log('swap');
+                        this.clustersBuffer[j].swap(this.clustersBuffer[z]);
+                    }
+                }
+            }
+        }
+        */
+
+        this.motionSensor.trigger('processor:compute', [
+            this.clustersBuffer,
+            this.context
+        ]);
     };
 
 }(window, document));
