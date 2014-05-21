@@ -37,7 +37,7 @@
     /**
      * Implements basic K-means algorythm
      */
-    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K) {
+    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor) {
         var k = K,
             p = O = P = null,
             dMin = d = 0,
@@ -45,15 +45,29 @@
             clusters = [],
             step = 0,
             maxSteps = 3,
-            maxDelta = 70;
+            maxDelta = 70,
+            w = VIDEO_WIDTH = motionSensor.VIDEO_WIDTH,
+            h = VIDEO_HEIGHT = motionSensor.VIDEO_HEIGHT;
+//if(k==1)
+//console.log(points.map(function (p) { return p.position.x + ',' + p.position.y; }).join(';\n'), K);
+
+        var cluster, j;
+        for (j = 0; j < k; j++) {
+            cluster = previousClusters[j];
+            if (cluster) {
+                var centroidPixel = new MotionSensor.Pixel(cluster.centroid, cluster.rgbFloat);
+                // ensure we have at leaset three points initially
+                points = points.concat([centroidPixel, centroidPixel, centroidPixel]);
+            }
+        }
 
         // PAM algorythm (k-Means clustering)
         for (step = 0; step < maxSteps; step++) {
             for (j = 0; j < k; j++) {
                 if (0 === step) {
                     if (!previousClusters[j]) {
-                        x = parseInt(Math.random()*VIDEO_WIDTH, 10);
-                        y = parseInt(Math.random()*VIDEO_HEIGHT, 10);
+                        x = Math.floor(Math.random()*VIDEO_WIDTH);
+                        y = Math.floor(Math.random()*VIDEO_HEIGHT);
                         clusters.push(new MotionSensor.Cluster({
                             id: j,
                             centroid: new MotionSensor.Vector2(x, y),
@@ -83,6 +97,7 @@
 
             for (i = 0, l = points.length; i < l; i++) {
                 p = points[i];
+                //if (!p) { console.log(points, i, p); throw 'aa'; }
                 dMin = Number.MAX_VALUE;
                 jMin = 0;
                 for (j = 0; j < k; j++) {
@@ -105,6 +120,8 @@
                 }
             }
         }
+//if(k==20)
+//console.log(clusters.map(function (c) { return c.id + '@' + c.centroid.x + ',' + c.centroid.y + ' c'; }).join(';\n'), K);
         return clusters;
     }
 

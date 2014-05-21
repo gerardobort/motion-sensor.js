@@ -16,6 +16,7 @@
         this.i = 0; // frame counter
         this.clustersBuffer = [];
         this.convexHull = new this.ConvexHull();
+        this.superClustersBuffer = [];
     }
 
     MotionSensor.prototype.Processor.prototype.processCircularBuffer = function (originalImageData, imageDataBuffers) {
@@ -67,19 +68,9 @@
             }
         }
 
-        // remember buffered object coordinates
-        var cluster;
-        for (j = 0; j < k; j++) {
-            cluster = this.clustersBuffer[j];
-            if (cluster) {
-                var centroidPixel = new MotionSensor.Pixel(cluster.centroid, cluster.rgbFloat);
-                // ensure we have at leaset three points initially
-                points = points.concat([centroidPixel, centroidPixel, centroidPixel]);//, cluster.boundaryPointIndices.map(function (i) { return cluster.pixels[i]; }));
-            }
-        }
 
         // compute clusters
-        clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k);
+        clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor);
 
         // paint canvas with the latest camera frame
         ctx.putImageData(imageDataBuffers[imageDataBuffersN-1], 0, 0);
@@ -178,10 +169,39 @@
             }
         }
 
+
         this.motionSensor.trigger('processor:compute', [
             this.clustersBuffer,
-            this.context
+            this.context,
+            1
         ]);
+
+        if (this.i > 30) {
+            this.superPoints = this.clustersBuffer.map(function (c) {
+                return new MotionSensor.Pixel(
+                    new MotionSensor.Vector2(c.centroid.x, c.centroid.y),
+                    new MotionSensor.Vector3(
+                        Math.floor(c.rgbFloat.x),
+                        Math.floor(c.rgbFloat.y),
+                        Math.floor(c.rgbFloat.z)
+                    )
+                );
+            });
+
+
+            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 2, this.motionSensor);
+
+            var processor = this;
+            this.superClustersBuffer.forEach(function (cluster) {
+                cluster.boundaryPointIndices = processor.convexHull.getGrahamScanPointIndices(cluster.points);
+            })
+
+            this.motionSensor.trigger('processor:compute', [
+                this.superClustersBuffer,
+                this.context,
+                2
+            ]);
+        }
     };
 
 }(window, document));

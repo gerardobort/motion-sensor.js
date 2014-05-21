@@ -39,20 +39,27 @@
                 fpsLogElement.innerText = fps + 'fps@x' + scale;
             });
 
-            motionSensor.on('processor:compute', function (clusters, context) {
+            motionSensor.on('processor:compute', function (clusters, context, level) {
                 clusters.forEach(function (cluster) {
-                    cluster.debugColor = 'rgba('
+                    cluster.xdebugColor = 'rgba('
                         + Math.floor(cluster.rgbFloat.x)
                         + ',' + Math.floor(cluster.rgbFloat.y)
                         + ',' + Math.floor(cluster.rgbFloat.z)
                         + ',0.6)';
+
                     // draw a circle around the cluster's centroid
                     context.beginPath();
-                    context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
+                    var maxDistance = 0, d;
+                    cluster.points.forEach(function (point) {
+                        if ((d = cluster.centroid.getDistance(point)) > maxDistance) {
+                            maxDistance = d;
+                        }
+                    });
+                    context.arc(cluster.centroid.x, cluster.centroid.y, level*(maxDistance/10), 0, 2 * Math.PI, false);
                     context.fillStyle = cluster.debugColor;
                     context.fill();
                     context.lineWidth = 0;
-                    context.strokeStyle = cluster.debugColor;
+                    context.strokeStyle = cluster.xdebugColor;
                     context.stroke();
 
                     // draw a representation of the cluster's direction
@@ -68,20 +75,20 @@
                     context.stroke();
 
                     // draw cluster bounding ploygon
-    /*
-                    rp = cluster.points[cluster.boundaryPointIndices[0]];
-                    context.beginPath();
-                    context.moveTo(rp.x, rp.y);
-                    context.fillStyle = cluster.debugColor;
-                    context.strokeStyle = "rgba(100, 100, 100, 0)";
-                    for (i = 1, l = cluster.boundaryPointIndices.length; i < l; i++) {
-                        rp = cluster.points[cluster.boundaryPointIndices[i]];
-                        context.lineTo(rp.x, rp.y);
-                    }
-                    context.fill();
-                    context.stroke();
-                    context.closePath();
-    */
+                    /*if (2 === level && cluster.boundaryPointIndices) {
+                        rp = cluster.points[cluster.boundaryPointIndices[0]];
+                        context.beginPath();
+                        context.moveTo(rp.x, rp.y);
+                        context.fillStyle = cluster.debugColor;
+                        context.strokeStyle = "rgba(100, 100, 100, 0)";
+                        for (i = 1, l = cluster.boundaryPointIndices.length; i < l; i++) {
+                            rp = cluster.points[cluster.boundaryPointIndices[i]];
+                            context.lineTo(rp.x, rp.y);
+                        }
+                        context.fill();
+                        context.stroke();
+                        context.closePath();
+                    }*/
                 });
             });
 
