@@ -27,8 +27,8 @@
         });
         if (!points.length) return [];
         var clusters = clusterfck.hcluster(points);
-        console.log(points, clusters);
-        throw 'ahh';
+        //console.log(points, clusters);
+        //throw 'ahh';
     };
 
     MotionSensor.Cluster.upsertArrayFromPoints_KMeans = function (previousClusters, points, K) {
@@ -67,6 +67,7 @@
                             debugColor: MotionSensor.Cluster.randomPointColors[j]
                         }));
                     } else {
+                        previousClusters[j].rgbFloat.dotProduct(0.8);
                         clusters.push(previousClusters[j]);
                     }
                 } else {
@@ -97,11 +98,10 @@
                     clusters[jMin].pixels.push(p);
                     clusters[jMin].acum[0] += p.position.x;
                     clusters[jMin].acum[1] += p.position.y;
-                } else if (step < maxSteps) {
                     // means color
-                    clusters[jMin].rgbFloat[0] += p.color.x/l;
-                    clusters[jMin].rgbFloat[1] += p.color.y/l;
-                    clusters[jMin].rgbFloat[2] += p.color.z/l;
+                    clusters[jMin].rgbFloat.x += p.color.x/l;
+                    clusters[jMin].rgbFloat.y += p.color.y/l;
+                    clusters[jMin].rgbFloat.z += p.color.z/l;
                 }
             }
         }

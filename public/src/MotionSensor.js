@@ -10,7 +10,7 @@
         this.video.autoplay = 'true';
         this.video.style.display = 'none';
 
-        this.setScale(.35);
+        this.setScale(options.initialScale || .35);
 
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
@@ -127,6 +127,11 @@
     };
     MotionSensor.Vector3.prototype.getDistance = function(v3) {
         return Math.sqrt(Math.pow(this.x - v3.x, 2) + Math.pow(this.y - v3.y, 2) + Math.pow(this.z - v3.z, 2));
+    };
+    MotionSensor.Vector3.prototype.dotProduct = function(k) {
+        this.x*=k;
+        this.y*=k;
+        this.z*=k;
     };
 
     MotionSensor.Pixel = function(v2Position, v3Color) {

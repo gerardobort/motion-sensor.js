@@ -18,12 +18,13 @@
         <script src="src/MotionSensor.Processor.js"></script>
         <script src="src/MotionSensor.ConvexHull.js"></script>
 
-        <style> xcanvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; } </style>
+        <style> canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; } </style>
 
         <script>
             var fpsLogElement = document.getElementById('fps-log');
 
             var motionSensor = new MotionSensor({
+                initialScale: 0.5,
                 totalBuffers: 3,
                 totalClusters: 20,
                 fpsControlEnabled: false,
@@ -40,6 +41,11 @@
 
             motionSensor.on('processor:compute', function (clusters, context) {
                 clusters.forEach(function (cluster) {
+                    cluster.debugColor = 'rgba('
+                        + Math.floor(cluster.rgbFloat.x)
+                        + ',' + Math.floor(cluster.rgbFloat.y)
+                        + ',' + Math.floor(cluster.rgbFloat.z)
+                        + ',0.6)';
                     // draw a circle around the cluster's centroid
                     context.beginPath();
                     context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
