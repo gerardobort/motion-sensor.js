@@ -24,7 +24,7 @@
             var fpsLogElement = document.getElementById('fps-log');
 
             var motionSensor = new MotionSensor({
-                initialScale: 1,
+                initialScale: .3,
                 totalBuffers: 3,
                 totalClusters: 30,
                 fpsControlEnabled: false,
@@ -69,7 +69,7 @@
                     context.stroke();
 
                     // draw cluster bounding ploygon
-                    /*if (2 === level && cluster.boundaryPointIndices) {
+                    if (2 === level && cluster.boundaryPointIndices) {
                         rp = cluster.points[cluster.boundaryPointIndices[0]];
                         context.beginPath();
                         context.moveTo(rp.x, rp.y);
@@ -82,7 +82,7 @@
                         context.fill();
                         context.stroke();
                         context.closePath();
-                    }*/
+                    }
                 });
             });
 

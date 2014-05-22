@@ -189,7 +189,7 @@
             });
 
 
-            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 2, this.motionSensor, 2);
+            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 6, this.motionSensor, 2);
 
             var processor = this;
             this.superClustersBuffer.forEach(function (cluster) {

@@ -39,7 +39,7 @@
      */
     MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor, level) {
         var k = K,
-            p = O = P = null,
+            p,
             dMin = d = 0,
             jMin = 0,
             clusters = [],
@@ -69,8 +69,8 @@
                         x = Math.floor(Math.random()*VIDEO_WIDTH);
                         y = Math.floor(Math.random()*VIDEO_HEIGHT);
                         if (2 === level) {
-                          z = Math.floor(Math.random());
-                          t = Math.floor(Math.random());
+                          z = Math.random();
+                          t = Math.random();
                         }
                         clusters.push(new MotionSensor.Cluster({
                             id: j,
@@ -105,8 +105,8 @@
                 dMin = Number.MAX_VALUE;
                 jMin = 0;
                 for (j = 0; j < k; j++) {
-                    O = [clusters[j].centroid.x, clusters[j].centroid.y];
-                    P = [p.position.x, p.position.y];
+// if (p.position.z && Math.random()>0.999)
+// console.log(p.position, clusters[j].centroid);
                     if ((d = p.position.getDistance(clusters[j].centroid)) < dMin) {
                         dMin = d;
                         jMin = j;
