@@ -31,13 +31,14 @@
         }
 
         this.attachedEvents = {};
+        this.processorConstructor = options.processor || this.Processor;
         this.performanceController = new this.PerformanceController(this);
     };
 
     MotionSensor.prototype.start = function () {
         var instance = this;
 
-        instance.processor = new instance.Processor(instance);
+        instance.processor = new instance.processorConstructor(instance);
 
         navigator.webkitGetUserMedia({ video: true },
             function (stream) {

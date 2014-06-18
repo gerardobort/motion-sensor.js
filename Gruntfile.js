@@ -7,6 +7,7 @@ module.exports = function(grunt) {
             "<%= properties.srcPath %>/MotionSensor.PerformanceController.js",
             "<%= properties.srcPath %>/MotionSensor.Cluster.js",
             "<%= properties.srcPath %>/MotionSensor.Processor.js",
+            "<%= properties.srcPath %>/MotionSensor.Processor2ClusterLevels.js",
             "<%= properties.srcPath %>/MotionSensor.ConvexHull.js",
         ]
     };
