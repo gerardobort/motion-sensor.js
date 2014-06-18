@@ -1,6 +1,6 @@
 ;(function (window, document) {
 
-    MotionSensor.prototype.ConvexHull = function() {
+    MotionSensor.ConvexHull = function() {
         this.ccw = function(p1, p2, p3) {
             if (!this.points[p1] || !this.points[p2] || !this.points[p3]) {
                 return; // horrible bugfix
@@ -94,7 +94,7 @@
         }
     }
 
-    MotionSensor.prototype.ConvexHull.prototype.Point = function(i, a, d) {
+    MotionSensor.ConvexHull.prototype.Point = function(i, a, d) {
         this.index = i;
         this.angle = a;
         this.distance = d;

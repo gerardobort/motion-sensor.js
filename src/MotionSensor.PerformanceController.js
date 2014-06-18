@@ -1,6 +1,6 @@
 ;(function (window, document) {
 
-    MotionSensor.prototype.PerformanceController = function (motionSensor) {
+    MotionSensor.PerformanceController = function (motionSensor) {
         this.motionSensor = motionSensor;
         this.timeMarksN = 60;
         this.timeMarks = [0, 0, 0, 0, 0, 0];
@@ -8,13 +8,13 @@
         this.EXPECTED_FPS = 30;
         this.fpsByScale = {};
     };
-    MotionSensor.prototype.PerformanceController.prototype.setFrameMark = function () {
+    MotionSensor.PerformanceController.prototype.setFrameMark = function () {
         for (var i = 0, l = this.timeMarksN-1; i < l; i++) {
             this.timeMarks[i] = this.timeMarks[i+1];
         }
         this.timeMarks[this.timeMarksN-1] = Date.now();
     };
-    MotionSensor.prototype.PerformanceController.prototype.getFPS = function () {
+    MotionSensor.PerformanceController.prototype.getFPS = function () {
         var dFrame = 0;
         for (var i = 0, l = this.timeMarksN-1; i < l; i++) {
             dFrame += (this.timeMarks[i+1] - this.timeMarks[i])/1000/l;
@@ -23,7 +23,7 @@
         this.fpsByScale[this.motionSensor.scale.toString()] = fps;
         return fps;
     };
-    MotionSensor.prototype.PerformanceController.prototype.control = function () {
+    MotionSensor.PerformanceController.prototype.control = function () {
         var fps = this.getFPS();
         fps < this.EXPECTED_FPS ? this.votes-- : this.votes++;
         this.motionSensor.trigger('fps:change', [fps, this.motionSensor.scale]);

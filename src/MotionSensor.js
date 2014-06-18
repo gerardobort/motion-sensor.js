@@ -31,9 +31,8 @@
         }
 
         this.attachedEvents = {};
-console.log(options.processor)
-        this.processorConstructor = options.processor || this.Processor;
-        this.performanceController = new this.PerformanceController(this);
+        this.processorConstructor = options.processor || this.constructor.Processor;
+        this.performanceController = new this.constructor.PerformanceController(this);
     };
 
     MotionSensor.prototype.start = function () {

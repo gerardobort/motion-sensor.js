@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
 
     var properties = {
-        srcPath: 'public/src',
+        srcPath: 'src',
         packageFiles: [
             "<%= properties.srcPath %>/MotionSensor.js",
             "<%= properties.srcPath %>/MotionSensor.PerformanceController.js",
