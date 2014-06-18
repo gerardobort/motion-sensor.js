@@ -15,7 +15,7 @@
 
         this.i = 0; // frame counter
         this.clustersBuffer = [];
-        this.convexHull = new this.ConvexHull();
+        this.convexHull = new motionSensor.ConvexHull();
         this.superClustersBuffer = [];
     }
 

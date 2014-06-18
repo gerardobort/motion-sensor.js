@@ -8,18 +8,18 @@
         return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2) + Math.pow(v1[i+2] - v2[i+2], 2));
     };
 
-    MotionSensor.prototype.Processor = function (motionSensor) {
+    MotionSensor.prototype.Processor2ClusterLevels = function (motionSensor) {
         // IoC
         this.motionSensor = motionSensor;
         this.context = motionSensor.canvasContext;
 
         this.i = 0; // frame counter
         this.clustersBuffer = [];
-        this.convexHull = new this.ConvexHull();
+        this.convexHull = new motionSensor.ConvexHull();
         this.superClustersBuffer = [];
     }
 
-    MotionSensor.prototype.Processor.prototype.processCircularBuffer = function (originalImageData, imageDataBuffers) {
+    MotionSensor.prototype.Processor2ClusterLevels.prototype.processCircularBuffer = function (originalImageData, imageDataBuffers) {
         this.i++;
 
         var imageDataBuffersN = imageDataBuffers.length;

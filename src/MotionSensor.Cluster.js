@@ -101,12 +101,10 @@
 
             for (i = 0, l = points.length; i < l; i++) {
                 p = points[i];
-                //if (!p) { console.log(points, i, p); throw 'aa'; }
+                if (!p) { continue; }
                 dMin = Number.MAX_VALUE;
                 jMin = 0;
                 for (j = 0; j < k; j++) {
-// if (p.position.z && Math.random()>0.999)
-// console.log(p.position, clusters[j].centroid);
                     if ((d = p.position.getDistance(clusters[j].centroid)) < dMin) {
                         dMin = d;
                         jMin = j;
@@ -124,8 +122,6 @@
                 }
             }
         }
-//if(k==20)
-//console.log(clusters.map(function (c) { return c.id + '@' + c.centroid.x + ',' + c.centroid.y + ' c'; }).join(';\n'), K);
         return clusters;
     }
 

@@ -31,6 +31,7 @@
         }
 
         this.attachedEvents = {};
+console.log(options.processor)
         this.processorConstructor = options.processor || this.Processor;
         this.performanceController = new this.PerformanceController(this);
     };
