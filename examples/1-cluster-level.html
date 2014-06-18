@@ -2,20 +2,20 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>basic demo - motion-sensor.js</title>
+        <title>1 cluster level - motion-sensor.js</title>
     </head>
     <body>
 
-        <h1>Basic Demo Example</h1>
+        <h1>1 Cluster Level Example</h1>
         <div>
             <code id="fps-log"></code>
         </div>
 
-        <script src="/MotionSensor.js"></script>
-        <script src="/MotionSensor.PerformanceController.js"></script>
-        <script src="/MotionSensor.Cluster.js"></script>
-        <script src="/MotionSensor.Processor.js"></script>
-        <script src="/MotionSensor.ConvexHull.js"></script>
+        <script src="/src/MotionSensor.js"></script>
+        <script src="/src/MotionSensor.PerformanceController.js"></script>
+        <script src="/src/MotionSensor.Cluster.js"></script>
+        <script src="/src/MotionSensor.Processor.js"></script>
+        <script src="/src/MotionSensor.ConvexHull.js"></script>
 
         <style> canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; } </style>
 
@@ -23,9 +23,9 @@
             var fpsLogElement = document.getElementById('fps-log');
 
             var motionSensor = new MotionSensor({
-                initialScale: 1,
+                initialScale: .3,
                 totalBuffers: 3,
-                totalClusters: 2,
+                totalClusters: 30,
                 fpsControlEnabled: false,
                 useDatGui: false,
                 regions: [] // a way to delimit the areas to check collission and improve performance
@@ -67,17 +67,6 @@
                     context.strokeStyle = cluster.debugColor;
                     context.stroke();
                 });
-
-                // having 2 clusters defined, draw a line that connects them
-                if (clusters[0] && clusters[1]) {
-                    context.beginPath();
-                    context.moveTo(clusters[0].centroid.x, clusters[0].centroid.y);
-                    context.lineTo(clusters[1].centroid.x, clusters[1].centroid.y);
-                    context.closePath();
-                    context.lineWidth = 2;
-                    context.strokeStyle = '#000';
-                    context.stroke();
-                }
             });
 
             motionSensor.start();
