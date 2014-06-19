@@ -8,12 +8,14 @@
         this.EXPECTED_FPS = 30;
         this.fpsByScale = {};
     };
+
     MotionSensor.PerformanceController.prototype.setFrameMark = function () {
         for (var i = 0, l = this.timeMarksN-1; i < l; i++) {
             this.timeMarks[i] = this.timeMarks[i+1];
         }
         this.timeMarks[this.timeMarksN-1] = Date.now();
     };
+
     MotionSensor.PerformanceController.prototype.getFPS = function () {
         var dFrame = 0;
         for (var i = 0, l = this.timeMarksN-1; i < l; i++) {
@@ -23,6 +25,7 @@
         this.fpsByScale[this.motionSensor.scale.toString()] = fps;
         return fps;
     };
+
     MotionSensor.PerformanceController.prototype.control = function () {
         var fps = this.getFPS();
         fps < this.EXPECTED_FPS ? this.votes-- : this.votes++;
