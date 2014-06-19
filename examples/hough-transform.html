@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>hough tranform - motion-sensor.js</title>
+    </head>
+    <body>
+
+        <h1>Hough Transform Tests</h1>
+        <div>
+            <code id="fps-log"></code>
+        </div>
+
+        <script src="../dist/motion-sensor.js"></script>
+
+        <style>
+            #fps-log { position: absolute; top: 10px; left: 10px; color: #0f0; z-index: 2; font-size: 20px; }
+            canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; }
+        </style>
+
+        <script>
+            var fpsLogElement = document.getElementById('fps-log');
+
+            var motionSensor = new MotionSensor({
+                initialScale: .3,
+                totalBuffers: 3,
+                totalClusters: 30,
+                fpsControlEnabled: false,
+                useDatGui: false,
+                processor: MotionSensor.ProcessorHough,
+                regions: [] // a way to delimit the areas to check collission and improve performance
+            });
+
+            motionSensor.on('start', function (canvas, context) {
+            });
+
+            motionSensor.on('fps:change', function (fps, scale) {
+                fpsLogElement.innerText = fps + 'fps@x' + scale;
+            });
+
+            motionSensor.on('processor:compute', function (clusters, context) {
+                clusters.forEach(function (cluster) {
+                    cluster.xdebugColor = 'rgba('
+                        + Math.floor(cluster.rgbFloat.x)
+                        + ',' + Math.floor(cluster.rgbFloat.y)
+                        + ',' + Math.floor(cluster.rgbFloat.z)
+                        + ',0.6)';
+
+                    // draw a circle around the cluster's centroid
+                    context.beginPath();
+                    context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
+                    context.fillStyle = cluster.debugColor;
+                    context.fill();
+                    context.lineWidth = 0;
+                    context.strokeStyle = cluster.xdebugColor;
+                    context.stroke();
+
+                    // draw a representation of the cluster's direction
+                    context.beginPath();
+                    context.moveTo(cluster.centroid.x, cluster.centroid.y);
+                    context.lineTo(
+                        cluster.centroid.x + cluster.versor.x * cluster.modulus,
+                        cluster.centroid.y + cluster.versor.y * cluster.modulus
+                    );
+                    context.closePath();
+                    context.lineWidth = 2;
+                    context.strokeStyle = cluster.debugColor;
+                    context.stroke();
+                });
+            });
+
+            motionSensor.start();
+
+        </script>
+
+    </body>
+</html>
+
