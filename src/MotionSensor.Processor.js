@@ -58,7 +58,9 @@
             x = (i/4) % w;
             y = parseInt((i/4) / w);
             if (this.i > imageDataBuffersN && (!(x % GRID_FACTOR) && !(y % GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                //newpx[i+3] = parseInt(alpha, 10); // debug
+                if (this.motionSensor.options.debug) {
+                    newpx[i+3] = parseInt(alpha, 10);
+                }
                 points.push(
                     new MotionSensor.Pixel(
                         new MotionSensor.Vector2(x, y),
