@@ -1,4 +1,4 @@
-;(function (window, document) {
+;(function (MotionSensor) {
 
     var distance2 = function (v1, v2, i) {
         return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2));
@@ -178,4 +178,4 @@
 
     };
 
-}(window, document));
+}(MotionSensor));

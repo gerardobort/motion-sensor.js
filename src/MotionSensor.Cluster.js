@@ -1,4 +1,4 @@
-;(function (window, document) {
+;(function (MotionSensor) {
 
 
     MotionSensor.Cluster = function(options) {
@@ -125,4 +125,4 @@
         return clusters;
     }
 
-}(window, document));
+}(MotionSensor));

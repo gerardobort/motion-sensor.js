@@ -1,4 +1,4 @@
-;(function (window, document) {
+;(function (MotionSensor) {
 
     MotionSensor.PerformanceController = function (motionSensor) {
         this.motionSensor = motionSensor;
@@ -52,4 +52,4 @@
         }
     };
 
-}(window, document));
+}(MotionSensor));

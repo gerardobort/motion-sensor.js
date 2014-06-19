@@ -107,7 +107,7 @@
     window.MotionSensor = MotionSensor;
 
 }(window, document));
-;;(function (window, document) {
+;;(function (MotionSensor) {
 
     MotionSensor.Vector2 = function(x, y) {
         this.x = x;
@@ -119,8 +119,8 @@
     };
 
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     MotionSensor.Vector3 = function(x, y, z) {
         this.x = x;
@@ -138,8 +138,8 @@
         this.z*=k;
     };
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     MotionSensor.Vector4 = function(x, y, z, t) {
         this.x = x;
@@ -159,16 +159,16 @@
         this.t*=k;
     };
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     MotionSensor.Pixel = function(v2Position, v3Color) {
         this.position = v2Position;
         this.color = v3Color;
     };
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     MotionSensor.PerformanceController = function (motionSensor) {
         this.motionSensor = motionSensor;
@@ -222,8 +222,8 @@
         }
     };
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
 
     MotionSensor.Cluster = function(options) {
@@ -350,8 +350,8 @@
         return clusters;
     }
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     var distance2 = function (v1, v2, i) {
         return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2));
@@ -531,8 +531,8 @@
 
     };
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     var distance2 = function (v1, v2, i) {
         return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2));
@@ -738,8 +738,8 @@
         }
     };
 
-}(window, document));
-;;(function (window, document) {
+}(MotionSensor));
+;;(function (MotionSensor) {
 
     MotionSensor.ConvexHull = function() {
     };
@@ -855,4 +855,4 @@
         }
     }
 
-}(window, document));
+}(MotionSensor));

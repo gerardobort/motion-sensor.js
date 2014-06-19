@@ -1,4 +1,4 @@
-;(function (window, document) {
+;(function (MotionSensor) {
 
     MotionSensor.Vector2 = function(x, y) {
         this.x = x;
@@ -10,4 +10,4 @@
     };
 
 
-}(window, document));
+}(MotionSensor));

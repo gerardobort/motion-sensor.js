@@ -1,4 +1,4 @@
-;(function (window, document) {
+;(function (MotionSensor) {
 
     MotionSensor.ConvexHull = function() {
     };
@@ -114,4 +114,4 @@
         }
     }
 
-}(window, document));
+}(MotionSensor));
