@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>basic demo - motion-sensor.js</title>
+    </head>
+    <body>
+
+        <h1>Basic Demo Example</h1>
+        <div>
+            <code id="fps-log"></code>
+        </div>
+
+        <script src="../dist/motion-sensor.js"></script>
+        <script src="parcycle.js"></script>
+
+        <style>
+            #fps-log { position: absolute; top: 10px; left: 10px; color: #0f0; z-index: 2; font-size: 20px; }
+            canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; }
+        </style>
+
+        <script>
+            var fpsLogElement = document.getElementById('fps-log');
+
+            var MOTION_POINTS = 30;
+
+            var motionSensor = new MotionSensor({
+                initialScale: .5,
+                totalBuffers: 3,
+                totalClusters: MOTION_POINTS,
+                fpsControlEnabled: true,
+                useDatGui: false,
+                debug: false,
+                regions: [] // a way to delimit the areas to check collission and improve performance
+            });
+
+            var particles = [];
+            for (var i = 0; i < MOTION_POINTS; i++) {
+                var pe = new cParticleEmitter();       
+                particles.push(pe);
+                pe.init();
+            }
+
+            motionSensor.on('start', function (canvas, context) {
+            });
+
+            motionSensor.on('fps:change', function (fps, scale) {
+                fpsLogElement.innerText = fps + 'fps@x' + scale;
+            });
+
+            motionSensor.on('processor:compute', function (clusters, context) {
+
+                context.beginPath();
+                context.moveTo(0, 0);
+                context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                context.lineTo(motionSensor.canvas.width, 0);
+                context.lineTo(motionSensor.canvas.width, motionSensor.canvas.height);
+                context.lineTo(0, motionSensor.canvas.height);
+                context.fill();
+                context.closePath();
+                    
+                clusters.forEach(function (cluster, i) {
+
+                    var p = particles[i];
+                    p.size = cluster.modulus/4;
+                    p.sizeRandom = 0;
+                    p.position.x = cluster.centroid.x;
+                    p.position.y = cluster.centroid.y;
+                    p.positionRandom.x = cluster.versor.x*20;
+                    p.positionRandom.y = cluster.versor.y*20;
+                    p.speed = 15 + cluster.modulus/4;
+                    p.sharpness = 20;
+                    p.sharpnessRandom = 30;
+                    p.angle = 180*(Math.atan2(cluster.versor.y, cluster.versor.x)/Math.PI);
+                    p.angleRandom = 60;
+                    p.timeToLive = 1;
+                    p.gravity.x = 0;
+                    p.gravity.y = -4;
+                    p.startColour = [ 100, 100, 10, 1 ];
+                    p.startColourRandom = [ 0, 0, 0, 0 ];
+                    p.finishColour = [ 255, 255, 255, 0.5 ];  
+                    p.finishColourRandom = [ 0, 0, 0, 0 ];
+                    p.update(1);
+                    p.renderParticles(context);
+
+                });
+
+            });
+
+            motionSensor.start();
+
+        </script>
+
+    </body>
+</html>
+
