@@ -104,58 +104,6 @@
         }
     };
 
-
-    var distance2 = function (v1, v2, i) {
-        return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2));
-    };
-
-    var distance3 = function (v1, v2, i) {
-        return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2) + Math.pow(v1[i+2] - v2[i+2], 2));
-    };
-
-    MotionSensor.Vector2 = function(x, y) {
-        this.x = x;
-        this.y = y;
-    };
-    MotionSensor.Vector2.prototype.getDistance = function(v2) {
-        return Math.sqrt(Math.pow(this.x - v2.x, 2) + Math.pow(this.y - v2.y, 2));
-    };
-
-    MotionSensor.Vector3 = function(x, y, z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    };
-    MotionSensor.Vector3.prototype.getDistance = function(v3) {
-        return Math.sqrt(Math.pow(this.x - v3.x, 2) + Math.pow(this.y - v3.y, 2) + Math.pow(this.z - v3.z, 2));
-    };
-    MotionSensor.Vector3.prototype.dotProduct = function(k) {
-        this.x*=k;
-        this.y*=k;
-        this.z*=k;
-    };
-
-    MotionSensor.Vector4 = function(x, y, z, t) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.t = t;
-    };
-    MotionSensor.Vector4.prototype.getDistance = function(v4) {
-        return Math.sqrt(0.5*Math.pow(this.x - v4.x, 2) + 0.5*Math.pow(this.y - v4.y, 2) + 10*Math.pow(this.z - v4.z, 2) + 10*Math.pow(this.t - v4.t, 2));
-    };
-    MotionSensor.Vector4.prototype.dotProduct = function(k) {
-        this.x*=k;
-        this.y*=k;
-        this.z*=k;
-        this.t*=k;
-    };
-
-    MotionSensor.Pixel = function(v2Position, v3Color) {
-        this.position = v2Position;
-        this.color = v3Color;
-    };
-
     window.MotionSensor = MotionSensor;
 
 }(window, document));

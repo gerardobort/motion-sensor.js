@@ -4,6 +4,10 @@ module.exports = function(grunt) {
         srcPath: 'src',
         packageFiles: [
             "<%= properties.srcPath %>/MotionSensor.js",
+            "<%= properties.srcPath %>/MotionSensor.Vector2.js",
+            "<%= properties.srcPath %>/MotionSensor.Vector3.js",
+            "<%= properties.srcPath %>/MotionSensor.Vector4.js",
+            "<%= properties.srcPath %>/MotionSensor.Pixel.js",
             "<%= properties.srcPath %>/MotionSensor.PerformanceController.js",
             "<%= properties.srcPath %>/MotionSensor.Cluster.js",
             "<%= properties.srcPath %>/MotionSensor.Processor.js",
