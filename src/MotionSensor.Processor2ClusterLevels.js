@@ -32,8 +32,8 @@
             newpx = newdata.data,
             len = newpx.length;
 
-        var MOTION_COLOR_THRESHOLD = 60,
-            GRID_FACTOR = 4,
+        var MOTION_COLOR_THRESHOLD = 50,
+            SAMPLING_GRID_FACTOR = Math.floor(2/this.motionSensor.scale), // 2 - 8
             MOTION_ALPHA_THRESHOLD = 120,
             alpha = 0,
             gamma = 3,
@@ -57,8 +57,10 @@
 
             x = (i/4) % w;
             y = parseInt((i/4) / w);
-            if (this.i > imageDataBuffersN && (!(x % GRID_FACTOR) && !(y % GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                //newpx[i+3] = parseInt(alpha, 10); // debug
+            if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
+                if (this.motionSensor.options.debug) {
+                    newpx[i+3] = parseInt(alpha, 10);
+                }
                 points.push(
                     new MotionSensor.Pixel(
                         new MotionSensor.Vector2(x, y),
