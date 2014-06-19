@@ -19,23 +19,7 @@
     }
 
     /**
-     * Adapter for clusterfck K-means library (WIP)
-     */
-    MotionSensor.Cluster.upsertArrayFromPoints_HCluster = function (previousClusters, points) {
-        points.forEach(function (point) {
-            point.vector = [point.position.x, point.position.y];
-        });
-        if (!points.length) return [];
-        var clusters = clusterfck.hcluster(points);
-        //console.log(points, clusters);
-        //throw 'ahh';
-    };
-
-    MotionSensor.Cluster.upsertArrayFromPoints_KMeans = function (previousClusters, points, K) {
-    };
-
-    /**
-     * Implements basic K-means algorythm
+     * Implements basic K-means algorithm
      */
     MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor, level) {
         var k = K,
