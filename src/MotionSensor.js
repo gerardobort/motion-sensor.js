@@ -10,7 +10,16 @@
         this.video.autoplay = 'true';
         this.video.style.display = 'none';
 
-        this.setScale(options.initialScale || .35);
+
+        this.videoScale = this.options.videoScale || 1;
+        this.VIDEO_WIDTH = this.videoScale*640;
+        this.VIDEO_HEIGHT = this.videoScale*480;
+        this.canvas.width = this.VIDEO_WIDTH;
+        this.canvas.height = this.VIDEO_HEIGHT;
+        this.video.width = this.VIDEO_WIDTH;
+        this.video.height = this.VIDEO_HEIGHT;
+
+        this.setScale(options.initialScale || .25);
 
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
@@ -56,13 +65,6 @@
 
     MotionSensor.prototype.setScale = function (scale) {
         this.scale = scale;
-        this.VIDEO_WIDTH = this.scale*640;
-        this.VIDEO_HEIGHT = this.scale*480;
-
-        this.canvas.width = this.VIDEO_WIDTH;
-        this.canvas.height = this.VIDEO_HEIGHT;
-        this.video.width = this.VIDEO_WIDTH;
-        this.video.height = this.VIDEO_HEIGHT;
     };
 
     MotionSensor.prototype.updateCanvas = function () {

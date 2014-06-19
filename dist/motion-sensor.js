@@ -10,7 +10,16 @@
         this.video.autoplay = 'true';
         this.video.style.display = 'none';
 
-        this.setScale(options.initialScale || .35);
+
+        this.videoScale = this.options.videoScale || 1;
+        this.VIDEO_WIDTH = this.videoScale*640;
+        this.VIDEO_HEIGHT = this.videoScale*480;
+        this.canvas.width = this.VIDEO_WIDTH;
+        this.canvas.height = this.VIDEO_HEIGHT;
+        this.video.width = this.VIDEO_WIDTH;
+        this.video.height = this.VIDEO_HEIGHT;
+
+        this.setScale(options.initialScale || .25);
 
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
@@ -56,13 +65,6 @@
 
     MotionSensor.prototype.setScale = function (scale) {
         this.scale = scale;
-        this.VIDEO_WIDTH = this.scale*640;
-        this.VIDEO_HEIGHT = this.scale*480;
-
-        this.canvas.width = this.VIDEO_WIDTH;
-        this.canvas.height = this.VIDEO_HEIGHT;
-        this.video.width = this.VIDEO_WIDTH;
-        this.video.height = this.VIDEO_HEIGHT;
     };
 
     MotionSensor.prototype.updateCanvas = function () {
@@ -369,8 +371,8 @@
             newpx = newdata.data,
             len = newpx.length;
 
-        var MOTION_COLOR_THRESHOLD = 60,
-            GRID_FACTOR = 4,
+        var MOTION_COLOR_THRESHOLD = 50,
+            SAMPLING_GRID_FACTOR = Math.floor(2/this.motionSensor.scale), // 2 - 8
             MOTION_ALPHA_THRESHOLD = 120,
             alpha = 0,
             gamma = 3,
@@ -394,7 +396,7 @@
 
             x = (i/4) % w;
             y = parseInt((i/4) / w);
-            if (this.i > imageDataBuffersN && (!(x % GRID_FACTOR) && !(y % GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
+            if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
                 if (this.motionSensor.options.debug) {
                     newpx[i+3] = parseInt(alpha, 10);
                 }
@@ -496,7 +498,7 @@
                     cluster.versor.x = 1;
                     cluster.versor.y = 0;
                 }
-                cluster.modulus *= (0.03 / this.motionSensor.scale);
+                cluster.modulus *= (0.006 / Math.pow(this.motionSensor.scale,2));
 
                 if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
                     cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
@@ -677,7 +679,7 @@
                     cluster.versor.x = 1;
                     cluster.versor.y = 0;
                 }
-                cluster.modulus *= (0.03 / this.motionSensor.scale);
+                cluster.modulus *= (0.006 / Math.pow(this.motionSensor.scale,2));
 
                 if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
                     cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
@@ -709,7 +711,7 @@
             });
 
 
-            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 6, this.motionSensor, 2);
+            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, this.motionSensor.options.totalSuperCusters, this.motionSensor, 2);
 
             var processor = this;
             this.superClustersBuffer.forEach(function (cluster) {

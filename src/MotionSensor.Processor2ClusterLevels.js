@@ -157,7 +157,7 @@
                     cluster.versor.x = 1;
                     cluster.versor.y = 0;
                 }
-                cluster.modulus *= (0.03 / this.motionSensor.scale);
+                cluster.modulus *= (0.006 / Math.pow(this.motionSensor.scale,2));
 
                 if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
                     cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
@@ -189,7 +189,7 @@
             });
 
 
-            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, 6, this.motionSensor, 2);
+            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, this.motionSensor.options.totalSuperCusters, this.motionSensor, 2);
 
             var processor = this;
             this.superClustersBuffer.forEach(function (cluster) {
