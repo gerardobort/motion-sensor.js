@@ -33,6 +33,7 @@
 
         this.canvas = document.createElement('canvas');
         this.canvas.id = 'hough-transform';
+        this.canvas.style.background = 'rgba(0, 0, 0, 0.8)';
         this.canvas.style.border = '1px solid rgba(0, 255, 0, 0.5)';
         this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
         this.canvas.width = this.numAngleCells;
@@ -69,7 +70,7 @@
             newpx[i  ] = 0;
             newpx[i+1] = 255;
             newpx[i+2] = 0;
-            newpx[i+3] += 15;
+            newpx[i+3] += 10;
         }
     }
 
@@ -78,7 +79,8 @@
 
         var imageDataBuffersN = imageDataBuffers.length;
 
-        var ctx = this.context;
+        var ctx = this.motionSensor.canvasContext;
+        var houghctx = this.context;
 
         var videodata = originalImageData,
             videopx = videodata.data,
@@ -119,7 +121,26 @@
                 }
             //}
         }
-        ctx.putImageData(houghBuffer, 0, 0);
+
+        for (i = 0; i < houghpx.length; i += 4) {
+            x = (i/4) % w;
+            y = parseInt((i/4) / w);
+
+            if ((!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && houghpx[i+3] > MOTION_ALPHA_THRESHOLD) {
+                if (this.motionSensor.options.debug) {
+                    houghpx[i] = 255;
+                    houghpx[i+1] = 0;
+                }
+                points.push(
+                    new MotionSensor.Pixel(
+                        new MotionSensor.Vector2(x, y),
+                        new MotionSensor.Vector3(0, 0, 0)
+                    )
+                );
+            }
+        }
+        houghctx.putImageData(houghBuffer, 0, 0);
+        clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor);
 
     };
 
