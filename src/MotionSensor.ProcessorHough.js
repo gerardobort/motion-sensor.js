@@ -8,6 +8,43 @@
         return Math.sqrt(Math.pow(v1[i+0] - v2[i+0], 2) + Math.pow(v1[i+1] - v2[i+1], 2) + Math.pow(v1[i+2] - v2[i+2], 2));
     };
 
+    var drawingWidth = 640;
+    var drawingHeight = 480;
+    var numAngleCells = 360;
+    var rhoMax = Math.sqrt(drawingWidth * drawingWidth + drawingHeight * drawingHeight);
+    var accum = Array(numAngleCells);
+
+    // Precalculate tables.
+    var cosTable = Array(numAngleCells);
+    var sinTable = Array(numAngleCells);
+    for (var theta = 0, thetaIndex = 0; thetaIndex < numAngleCells; theta += Math.PI / numAngleCells, thetaIndex++) {
+        cosTable[thetaIndex] = Math.cos(theta);
+        sinTable[thetaIndex] = Math.sin(theta);
+    }
+
+    // Implementation with lookup tables.
+    function houghAcc(x, y, ctx) {
+        var rho;
+        var thetaIndex = 0;
+        x -= drawingWidth / 2;
+        y -= drawingHeight / 2;
+        for (; thetaIndex < numAngleCells; thetaIndex++) {
+            rho = rhoMax + x * cosTable[thetaIndex] + y * sinTable[thetaIndex];
+            rho >>= 1;
+            if (accum[thetaIndex] == undefined) accum[thetaIndex] = [];
+            if (accum[thetaIndex][rho] == undefined) {
+                accum[thetaIndex][rho] = 1;
+            } else {
+                accum[thetaIndex][rho]++;
+            }
+
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+            ctx.fillRect(drawingWidth/2 + thetaIndex, rho - drawingHeight/2, 1, 1);
+            ctx.closePath();
+        }
+    }
+
     MotionSensor.ProcessorHough = function (motionSensor) {
         // IoC
         this.motionSensor = motionSensor;
@@ -35,8 +72,6 @@
         var MOTION_COLOR_THRESHOLD = 50,
             SAMPLING_GRID_FACTOR = Math.floor(2/this.motionSensor.scale), // 2 - 8
             MOTION_ALPHA_THRESHOLD = 120,
-            alpha = 0,
-            gamma = 3,
             i = l = x = y = 0,
             w = VIDEO_WIDTH = this.motionSensor.VIDEO_WIDTH,
             h = VIDEO_HEIGHT = this.motionSensor.VIDEO_HEIGHT;
@@ -54,156 +89,15 @@
                     alpha -= 255/l;
                 }
             }
-
             x = (i/4) % w;
             y = parseInt((i/4) / w);
             if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                if (this.motionSensor.options.debug) {
-                    newpx[i+3] = parseInt(alpha, 10);
+                if (Math.random() < 0.2) {
+                    houghAcc(x, y, ctx);
                 }
-                points.push(
-                    new MotionSensor.Pixel(
-                        new MotionSensor.Vector2(x, y),
-                        new MotionSensor.Vector3(newpx[i+0], newpx[i+1], newpx[i+2])
-                    )
-                );
             }
         }
 
-
-        // compute clusters
-        clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor);
-
-        // paint canvas with the latest camera frame
-        ctx.putImageData(imageDataBuffers[imageDataBuffersN-1], 0, 0);
-
-
-        for (var j = 0, k = clusters.length; j < k; j++) {
-            var cluster = clusters[j];
-
-            if (cluster.points.length < 3) { 
-                continue;
-            }
-
-            // draw object hulls
-            cluster.boundaryPointIndices = this.convexHull.getGrahamScanPointIndices(cluster.points);
-
-            // compute cluster motion values
-            if (cluster.boundaryPointIndices && cluster.boundaryPointIndices.length > 0) {
-
-                /// <---
-                var p, nx, ny, dx, dy, q, prevpx, c1, c2, cx = cy = countx = county = 0, maxpx = 30, pcounter = 0;
-
-                for (i = 0, l = cluster.points.length; i < l; i++) {
-                    x = cluster.points[i].x;
-                    y = cluster.points[i].y;
-
-                    prevpx = imageDataBuffers[imageDataBuffersN-2].data;
-                    lastpx = imageDataBuffers[imageDataBuffersN-1].data;
-
-                    q = (y*w + x)*4;
-                    c1 = [lastpx[q+0], lastpx[q+1], lastpx[q+2]];
-
-                    cx = cy = 0;
-
-                    for (dx = 0; dx < maxpx; dx++) {
-                        nx = x + dx;
-                        q = (y*w + nx)*4;
-                        c2 = [prevpx[q+0], prevpx[q+1], prevpx[q+2]];
-                        if (distance3(c1, c2, 0) < 50) {
-                            cx++;
-                        } else {
-                            break;
-                        }
-                    }
-                    for (dx = 0; dx > -maxpx; dx--) {
-                        nx = x + dx;
-                        q = (y*w + nx)*4;
-                        c2 = [prevpx[q+0], prevpx[q+1], prevpx[q+2]];
-                        if (distance3(c1, c2, 0) < 50) {
-                            cx--;
-                        } else {
-                            break;
-                        }
-                    }
-                    for (dy = 0; dy < maxpx; dy++) {
-                        ny = y + dy;
-                        q = (ny*w + x)*4;
-                        c2 = [prevpx[q+0], prevpx[q+1], prevpx[q+2]];
-                        if (distance3(c1, c2, 0) < 50) {
-                            cy++;
-                        } else {
-                            break;
-                        }
-                    }
-                    for (dy = 0; dy > -maxpx; dy--) {
-                        ny = y + dy;
-                        q = (ny*w + x)*4;
-                        c2 = [prevpx[q+0], prevpx[q+1], prevpx[q+2]];
-                        if (distance3(c1, c2, 0) < 50) {
-                            cy--;
-                        } else {
-                            break;
-                        }
-                    }
-                    countx += cx;
-                    county += cy;
-                    pcounter++;
-                }
-
-                cluster.modulus = Math.sqrt(countx*countx + county*county);
-                if (cluster.modulus) {
-                    cluster.versor.x = -countx/cluster.modulus;
-                    cluster.versor.y = -county/cluster.modulus;
-                } else {
-                    cluster.versor.x = 1;
-                    cluster.versor.y = 0;
-                }
-                cluster.modulus *= (0.006 / Math.pow(this.motionSensor.scale,2));
-
-                if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
-                    cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
-                    cluster.centroid.y = (cluster.centroid.y + this.clustersBuffer[j].centroid.y)*.5;
-                }
-
-                ///  --->
-                this.clustersBuffer[j] = cluster; // update buffer
-            }
-        }
-
-
-        this.motionSensor.trigger('processor:compute', [
-            this.clustersBuffer,
-            this.context,
-            1
-        ]);
-
-        if (this.i > 30) {
-            this.superPoints = this.clustersBuffer.map(function (c) {
-                return new MotionSensor.Pixel(
-                    new MotionSensor.Vector4(c.centroid.x, c.centroid.y, c.versor.x*c.modulus, c.versor.y*c.modulus),
-                    new MotionSensor.Vector3(
-                        Math.floor(c.rgbFloat.x),
-                        Math.floor(c.rgbFloat.y),
-                        Math.floor(c.rgbFloat.z)
-                    )
-                );
-            });
-
-
-            this.superClustersBuffer = MotionSensor.Cluster.upsertArrayFromPoints(this.superClustersBuffer, this.superPoints, this.motionSensor.options.totalSuperCusters, this.motionSensor, 2);
-
-            var processor = this;
-            this.superClustersBuffer.forEach(function (cluster) {
-                cluster.boundaryPointIndices = processor.convexHull.getGrahamScanPointIndices(cluster.points);
-            })
-
-            this.motionSensor.trigger('processor:compute', [
-                this.superClustersBuffer,
-                this.context,
-                2
-            ]);
-        }
     };
 
 }(MotionSensor));
