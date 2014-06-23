@@ -30,6 +30,16 @@
             this.cosTable[thetaIndex] = Math.cos(theta);
             this.sinTable[thetaIndex] = Math.sin(theta);
         }
+
+        this.canvas = document.createElement('canvas');
+        this.canvas.id = 'hough-transform';
+        this.canvas.style.border = '1px solid rgba(0, 255, 0, 0.5)';
+        this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
+        this.canvas.width = this.numAngleCells;
+        this.canvas.height = this.rhoMax/2;
+        var body = document.getElementsByTagName('body')[0];
+        body.appendChild(this.canvas);
+        this.context = this.canvas.getContext('2d');
     }
 
 
@@ -39,6 +49,7 @@
         var thetaIndex = 0;
         var i, xdx, ydy;
         var w = motionSensor.VIDEO_WIDTH, h = motionSensor.VIDEO_HEIGHT;
+
         x -= w / 2;
         y -= h / 2;
         for (; thetaIndex < this.numAngleCells; thetaIndex++) {
@@ -51,10 +62,14 @@
                 this.accum[thetaIndex][rho]++;
             }
 
-            xdx = Math.floor(w/2 + thetaIndex - 40);
-            ydy = Math.floor(rho - h/2);
+            xdx = Math.floor(thetaIndex);
+            ydy = Math.floor(rho - this.rhoMax/4);
             i = (ydy*w + xdx)*4;
-            newpx[i+3] *= .9;
+            
+            newpx[i  ] = 0;
+            newpx[i+1] = 255;
+            newpx[i+2] = 0;
+            newpx[i+3] += 15;
         }
     }
 
@@ -82,6 +97,10 @@
             clusters = [],
             points = [];
 
+        houghBufferPrevious = this.context.getImageData(0, 0, w, h);
+        houghBuffer = this.context.createImageData(w, h);
+        houghpx = houghBuffer.data;
+
         // iterate through the main buffer and calculate the differences with previous
         for (i = 0; i < len; i += 4) {
             // change the alpha channel based on the frame color differences
@@ -93,13 +112,14 @@
             }
             x = (i/4) % w;
             y = parseInt((i/4) / w);
-            if (Math.random() < this.motionSensor.scale) {
+
+            //if (Math.random() < this.motionSensor.scale) {
                 if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                        this.houghAcc(x, y, newpx);
+                    this.houghAcc(x, y, houghpx);
                 }
-            }
+            //}
         }
-        ctx.putImageData(imageDataBuffers[imageDataBuffersN-1], 0, 0);
+        ctx.putImageData(houghBuffer, 0, 0);
 
     };
 

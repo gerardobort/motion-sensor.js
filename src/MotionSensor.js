@@ -4,6 +4,7 @@
         this.options = options;
 
         this.canvas = document.createElement('canvas');
+        this.canvas.id = 'motion-sensor';
         this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
 
         this.video = document.createElement('video');
