@@ -23,9 +23,10 @@
     }
 
     // Implementation with lookup tables.
-    function houghAcc(x, y, ctx) {
+    function houghAcc(x, y, newpx) {
         var rho;
         var thetaIndex = 0;
+        var i, xdx, ydy;
         x -= drawingWidth / 2;
         y -= drawingHeight / 2;
         for (; thetaIndex < numAngleCells; thetaIndex++) {
@@ -38,10 +39,10 @@
                 accum[thetaIndex][rho]++;
             }
 
-            ctx.beginPath();
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
-            ctx.fillRect(drawingWidth/2 + thetaIndex, rho - drawingHeight/2, 1, 1);
-            ctx.closePath();
+            xdx = Math.floor(drawingWidth/2 + thetaIndex - 40);
+            ydy = Math.floor(rho - drawingHeight/2);
+            i = (ydy*drawingWidth + xdx)*4;
+            newpx[i+3] *= .9;
         }
     }
 
@@ -92,11 +93,12 @@
             x = (i/4) % w;
             y = parseInt((i/4) / w);
             if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                if (Math.random() < 0.2) {
-                    houghAcc(x, y, ctx);
+                if (Math.random() < this.motionSensor.scale) {
+                    houghAcc(x, y, newpx);
                 }
             }
         }
+        ctx.putImageData(imageDataBuffers[imageDataBuffersN-1], 0, 0);
 
     };
 
