@@ -24,7 +24,7 @@
             var motionSensor = new MotionSensor({
                 initialScale: .3,
                 totalBuffers: 3,
-                totalClusters: 6,
+                totalClusters: 1,
                 fpsControlEnabled: false,
                 useDatGui: false,
                 processor: MotionSensor.ProcessorHough,
@@ -39,7 +39,7 @@
                 fpsLogElement.innerText = fps + 'fps@x' + scale;
             });
 
-            motionSensor.on('processor:compute', function (clusters, context) {
+            motionSensor.on('processor:compute:hough', function (clusters, context) {
                 clusters.forEach(function (cluster) {
                     cluster.xdebugColor = 'rgba('
                         + Math.floor(cluster.rgbFloat.x)
@@ -49,23 +49,30 @@
 
                     // draw a circle around the cluster's centroid
                     context.beginPath();
-                    context.arc(cluster.centroid.x, cluster.centroid.y, cluster.points.length/6, 0, 2 * Math.PI, false);
-                    context.fillStyle = cluster.xdebugColor;
+                    context.arc(cluster.centroid.x, cluster.centroid.y, Math.sqrt(cluster.points.length), 0, 2 * Math.PI, false);
+                    context.fillStyle = cluster.debugColor;
                     context.fill();
                     context.lineWidth = 0;
                     context.strokeStyle = cluster.xdebugColor;
                     context.stroke();
+                });
+            });
 
-                    // draw a representation of the cluster's direction
+            motionSensor.on('processor:compute', function (clusters, context) {
+                clusters.forEach(function (cluster) {
+                    cluster.xdebugColor = 'rgba('
+                        + Math.floor(cluster.rgbFloat.x)
+                        + ',' + Math.floor(cluster.rgbFloat.y)
+                        + ',' + Math.floor(cluster.rgbFloat.z)
+                        + ',1)';
+
+                    // draw a representation of the crossing line
                     context.beginPath();
-                    context.moveTo(cluster.centroid.x, cluster.centroid.y);
-                    context.lineTo(
-                        cluster.centroid.x + cluster.versor.x * cluster.modulus,
-                        cluster.centroid.y + cluster.versor.y * cluster.modulus
-                    );
+                    context.moveTo(cluster.p1.x, cluster.p1.y);
+                    context.lineTo(cluster.p2.x, cluster.p2.y);
                     context.closePath();
                     context.lineWidth = 2;
-                    context.strokeStyle = cluster.debugColor;
+                    context.strokeStyle = cluster.xdebugColor;
                     context.stroke();
                 });
             });

@@ -160,14 +160,28 @@
                 cluster.centroid.y = (cluster.centroid.y + this.clustersBuffer[j].centroid.y)*.5;
             }
 
+            var rho = cluster.centroid.y;
+            var theta = Math.floor(cluster.centroid.x);
+
+            var ox = w/2 + (rho - (h/2)*this.sinTable[theta])/this.cosTable[theta];
+            var oy = h/2 + (rho - (w/2)*this.cosTable[theta])/this.sinTable[theta];
+
+            cluster.p1 = new MotionSensor.Vector2(ox-rho*this.cosTable[theta], oy-rho*this.sinTable[theta]);
+            cluster.p2 = new MotionSensor.Vector2(ox, oy);
+
             this.clustersBuffer[j] = cluster; // update buffer
         }
 
-        this.motionSensor.trigger('processor:compute', [
+        this.motionSensor.trigger('processor:compute:hough', [
             this.clustersBuffer,
             this.context
         ]);
-        this.clustersBuffer
+
+        this.motionSensor.trigger('processor:compute', [
+            this.clustersBuffer,
+            this.motionSensor.canvasContext
+        ]);
+
 
     };
 
