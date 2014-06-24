@@ -45,7 +45,7 @@
 
 
     // Implementation with lookup tables.
-    MotionSensor.ProcessorHough.prototype.houghAcc = function (x, y, newpx) {
+    MotionSensor.ProcessorHough.prototype.houghAcc = function (x, y, r, g, b, newpx) {
         var rho;
         var thetaIndex = 0;
         var i, xdx, ydy;
@@ -67,6 +67,9 @@
             ydy = Math.floor(rho - this.rhoMax/4);
             i = (ydy*w + xdx)*4;
             
+            //newpx[i  ] = r;
+            //newpx[i+1] = g;
+            //newpx[i+2] = b;
             newpx[i  ] = 0;
             newpx[i+1] = 255;
             newpx[i+2] = 0;
@@ -99,7 +102,7 @@
             clusters = [],
             points = [];
 
-        houghBufferPrevious = this.context.getImageData(0, 0, w, h);
+        houghBufferPrevious = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
         houghBuffer = this.context.createImageData(w, h);
         houghpx = houghBuffer.data;
 
@@ -117,7 +120,7 @@
 
             //if (Math.random() < this.motionSensor.scale) {
                 if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                    this.houghAcc(x, y, houghpx);
+                    this.houghAcc(x, y, newpx[i], newpx[i+1], newpx[i+2], houghpx);
                 }
             //}
         }
@@ -140,7 +143,31 @@
             }
         }
         houghctx.putImageData(houghBuffer, 0, 0);
-        clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor);
+        clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor, 1, this.canvas.width, this.canvas.height);
+
+        for (var j = 0, k = clusters.length; j < k; j++) {
+            var cluster = clusters[j];
+            if (cluster.points.length < 3) { 
+                continue;
+            }
+
+            cluster.modulus = 1; // fake value
+            cluster.versor.x = 1;
+            cluster.versor.y = 0;
+
+            if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
+                cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
+                cluster.centroid.y = (cluster.centroid.y + this.clustersBuffer[j].centroid.y)*.5;
+            }
+
+            this.clustersBuffer[j] = cluster; // update buffer
+        }
+
+        this.motionSensor.trigger('processor:compute', [
+            this.clustersBuffer,
+            this.context
+        ]);
+        this.clustersBuffer
 
     };
 

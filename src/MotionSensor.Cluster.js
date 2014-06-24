@@ -21,7 +21,7 @@
     /**
      * Implements basic K-means algorithm
      */
-    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor, level) {
+    MotionSensor.Cluster.upsertArrayFromPoints = function (previousClusters, points, K, motionSensor, level, w, h) {
         var k = K,
             p,
             dMin = d = 0,
@@ -30,8 +30,8 @@
             step = 0,
             maxSteps = 3,
             maxDelta = 70,
-            w = VIDEO_WIDTH = motionSensor.VIDEO_WIDTH,
-            h = VIDEO_HEIGHT = motionSensor.VIDEO_HEIGHT;
+            w = VIDEO_WIDTH = w || motionSensor.VIDEO_WIDTH,
+            h = VIDEO_HEIGHT = h || motionSensor.VIDEO_HEIGHT;
 
         var x,y,z,t;
 
@@ -82,10 +82,14 @@
                     clusters[j].acum = [0, 0];
                 }
             }
-
+if (points.length > 10) {
+//console.log(points);
+//throw 'xx';
+}
             for (i = 0, l = points.length; i < l; i++) {
                 p = points[i];
                 if (!p) { continue; }
+//console.log(p.position.x);
                 dMin = Number.MAX_VALUE;
                 jMin = 0;
                 for (j = 0; j < k; j++) {
