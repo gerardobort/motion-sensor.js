@@ -35,9 +35,9 @@
         this.canvas.id = 'hough-transform';
         this.canvas.style.background = 'rgba(0, 0, 0, 0.8)';
         this.canvas.style.border = '1px solid rgba(0, 255, 0, 0.5)';
-        this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
+        //this.canvas.style.webkitTransform = 'scaleX(-1)'; // TODO redo: hack for mirroring
         this.canvas.width = this.numAngleCells;
-        this.canvas.height = this.rhoMax/2;
+        this.canvas.height = this.rhoMax;
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
         this.context = this.canvas.getContext('2d');
@@ -69,10 +69,10 @@
         var rho;
         var thetaIndex = 0;
         var i, xdx, ydy;
-        var w = motionSensor.VIDEO_WIDTH, h = motionSensor.VIDEO_HEIGHT;
+        var w = this.numAngleCells, h = this.rhoMax;
 
-        x -= w / 2;
-        y -= h / 2;
+        //x -= w / 2;
+        //y -= h / 2;
         for (; thetaIndex < this.numAngleCells; thetaIndex++) {
             rho = this.rhoMax + x * this.cosTable[thetaIndex] + y * this.sinTable[thetaIndex];
             rho >>= 1;
@@ -84,16 +84,21 @@
             }
 
             xdx = Math.floor(thetaIndex);
-            ydy = Math.floor(rho - this.rhoMax/4);
+            ydy = Math.floor(rho);
             i = (ydy*w + xdx)*4;
             
-            //newpx[i  ] = r;
-            //newpx[i+1] = g;
-            //newpx[i+2] = b;
-            newpx[i  ] = 0;
-            newpx[i+1] = 255;
-            newpx[i+2] = 0;
-            newpx[i+3] += alphaInc;
+            if (
+                0 <= xdx && xdx <= this.numAngleCells
+                && 0 <= ydy && ydy <= this.rhoMax
+                ) {
+                // newpx[i  ] = r;
+                // newpx[i+1] = g;
+                // newpx[i+2] = b;
+                newpx[i  ] = 0;
+                newpx[i+1] = 255;
+                newpx[i+2] = 0;
+                newpx[i+3] += alphaInc;
+            }
         }
     }
 
@@ -122,8 +127,8 @@
             clusters = [],
             points = [];
 
-        houghBufferPrevious = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
-        houghBuffer = this.context.createImageData(w, h);
+        //houghBufferPrevious = houghctx.getImageData(0, 0, this.numAngleCells, this.rhoMax);
+        houghBuffer = houghctx.createImageData(this.numAngleCells, this.rhoMax);
         houghpx = houghBuffer.data;
 
         // iterate through the main buffer and calculate the differences with previous
@@ -173,7 +178,7 @@
         if (this.motionSensor.options.debug) {
             houghctx.beginPath();
             houghctx.fillStyle = '#f00';
-            houghctx.fillRect(this.numAngleCells - (this.houghMouseX - 2), this.houghMouseY - 2, 4, 4);
+            houghctx.fillRect(/*this.numAngleCells -*/(this.houghMouseX - 2), this.houghMouseY - 2, 4, 4);
             houghctx.closePath();
         }
 
