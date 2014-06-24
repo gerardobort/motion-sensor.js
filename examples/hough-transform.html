@@ -35,7 +35,7 @@
                 initialScale: .3,
                 videoScale: 1,
                 totalBuffers: 3,
-                totalClusters: 1,
+                totalClusters: 6,
                 fpsControlEnabled: false,
                 useDatGui: false,
                 processor: MotionSensor.ProcessorHough,
@@ -82,8 +82,8 @@
                     context.moveTo(cluster.p1.x, cluster.p1.y);
                     context.lineTo(cluster.p2.x, cluster.p2.y);
                     context.closePath();
-                    context.lineWidth = 2;
-                    context.strokeStyle = cluster.xdebugColor;
+                    context.lineWidth = Math.sqrt(cluster.points.length);
+                    context.strokeStyle = cluster.debugColor;
                     context.stroke();
                 });
             });
