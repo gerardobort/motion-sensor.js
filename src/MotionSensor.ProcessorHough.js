@@ -41,11 +41,31 @@
         var body = document.getElementsByTagName('body')[0];
         body.appendChild(this.canvas);
         this.context = this.canvas.getContext('2d');
+
+        var instance = this;
+        if (motionSensor.options.debug) {
+            motionSensor.canvas.addEventListener('mousemove', function (e) {
+                instance.mouseX = e.layerX,
+                instance.mouseY = e.layerY;
+            });
+            instance.canvas.addEventListener('mousemove', function (e) {
+                instance.houghMouseX = e.layerX,
+                instance.houghMouseY = e.layerY;
+            });
+            motionSensor.canvas.addEventListener('mouseout', function (e) {
+                instance.mouseX = motionSensor.VIDEO_WIDTH/2,
+                instance.mouseY = motionSensor.VIDEO_HEIGHT/2;
+            });
+            instance.canvas.addEventListener('mouseout', function (e) {
+                instance.houghMouseX = instance.numAngleCells/2,
+                instance.houghMouseY = instance.rhoMax/2;
+            });
+        }
     }
 
 
     // Implementation with lookup tables.
-    MotionSensor.ProcessorHough.prototype.houghAcc = function (x, y, r, g, b, newpx) {
+    MotionSensor.ProcessorHough.prototype.houghAcc = function (x, y, r, g, b, alphaInc, newpx) {
         var rho;
         var thetaIndex = 0;
         var i, xdx, ydy;
@@ -73,7 +93,7 @@
             newpx[i  ] = 0;
             newpx[i+1] = 255;
             newpx[i+2] = 0;
-            newpx[i+3] += 10;
+            newpx[i+3] += alphaInc;
         }
     }
 
@@ -120,7 +140,7 @@
 
             //if (Math.random() < this.motionSensor.scale) {
                 if (this.i > imageDataBuffersN && (!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && alpha > MOTION_ALPHA_THRESHOLD) {
-                    this.houghAcc(x, y, newpx[i], newpx[i+1], newpx[i+2], houghpx);
+                    this.houghAcc(x, y, newpx[i], newpx[i+1], newpx[i+2], 10, houghpx);
                 }
             //}
         }
@@ -130,10 +150,6 @@
             y = parseInt((i/4) / w);
 
             if ((!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && houghpx[i+3] > MOTION_ALPHA_THRESHOLD) {
-                if (this.motionSensor.options.debug) {
-                    //houghpx[i] = 255;
-                    //houghpx[i+1] = 0;
-                }
                 points.push(
                     new MotionSensor.Pixel(
                         new MotionSensor.Vector2(x, y),
@@ -142,7 +158,25 @@
                 );
             }
         }
+
+
+        if (this.motionSensor.options.debug) {
+            ctx.beginPath();
+            ctx.fillStyle = '#f00';
+            ctx.fillRect(w - (this.mouseX - 2), this.mouseY - 2, 4, 4);
+            ctx.closePath();
+            this.houghAcc(this.mouseX, this.mouseY, 255, 0, 0, 100, houghpx);
+        }
+
         houghctx.putImageData(houghBuffer, 0, 0);
+
+        if (this.motionSensor.options.debug) {
+            houghctx.beginPath();
+            houghctx.fillStyle = '#f00';
+            houghctx.fillRect(this.numAngleCells - (this.houghMouseX - 2), this.houghMouseY - 2, 4, 4);
+            houghctx.closePath();
+        }
+
         clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor, 1, this.canvas.width, this.canvas.height);
 
         for (var j = 0, k = clusters.length; j < k; j++) {

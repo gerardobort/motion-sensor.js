@@ -11,11 +11,21 @@
             <code id="fps-log"></code>
         </div>
 
-        <script src="../dist/motion-sensor.js"></script>
+        <script src="../src/MotionSensor.js"></script>
+        <script src="../src/MotionSensor.Vector2.js"></script>
+        <script src="../src/MotionSensor.Vector3.js"></script>
+        <script src="../src/MotionSensor.Vector4.js"></script>
+        <script src="../src/MotionSensor.Pixel.js"></script>
+        <script src="../src/MotionSensor.PerformanceController.js"></script>
+        <script src="../src/MotionSensor.Cluster.js"></script>
+        <script src="../src/MotionSensor.Processor.js"></script>
+        <script src="../src/MotionSensor.Processor2ClusterLevels.js"></script>
+        <script src="../src/MotionSensor.ProcessorHough.js"></script>
+        <script src="../src/MotionSensor.ConvexHull.js"></script>
 
         <style>
             #fps-log { position: absolute; top: 10px; left: 10px; color: #0f0; z-index: 2; font-size: 20px; }
-            canvas#motion-sensor { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; }
+            !canvas#motion-sensor { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; }
         </style>
 
         <script>
@@ -23,6 +33,7 @@
 
             var motionSensor = new MotionSensor({
                 initialScale: .3,
+                videoScale: 1,
                 totalBuffers: 3,
                 totalClusters: 1,
                 fpsControlEnabled: false,

@@ -1,5 +1,12 @@
 ;(function (window, document) {
 
+    navigator.getUserMedia = (
+        navigator.getUserMedia
+        || navigator.webkitGetUserMedia
+        || navigator.mozGetUserMedia
+        || navigator.msGetUserMedia
+    );
+
     var MotionSensor = function (options) {
         this.options = options;
 
@@ -50,7 +57,7 @@
 
         instance.processor = new instance.processorConstructor(instance);
 
-        navigator.webkitGetUserMedia({ video: true },
+        navigator.getUserMedia({ video: true },
             function (stream) {
                 // replace with another video source if needed
                 instance.video.src = webkitURL.createObjectURL(stream);
