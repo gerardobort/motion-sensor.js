@@ -45,12 +45,12 @@
                         + Math.floor(cluster.rgbFloat.x)
                         + ',' + Math.floor(cluster.rgbFloat.y)
                         + ',' + Math.floor(cluster.rgbFloat.z)
-                        + ',0.6)';
+                        + ',0.5)';
 
                     // draw a circle around the cluster's centroid
                     context.beginPath();
-                    context.arc(cluster.centroid.x, cluster.centroid.y, 6, 0, 2 * Math.PI, false);
-                    context.fillStyle = cluster.debugColor;
+                    context.arc(cluster.centroid.x, cluster.centroid.y, cluster.points.length/6, 0, 2 * Math.PI, false);
+                    context.fillStyle = cluster.xdebugColor;
                     context.fill();
                     context.lineWidth = 0;
                     context.strokeStyle = cluster.xdebugColor;
