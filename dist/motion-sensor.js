@@ -870,13 +870,13 @@ if (points.length > 10) {
 
             if ((!(x % SAMPLING_GRID_FACTOR) && !(y % SAMPLING_GRID_FACTOR)) && houghpx[i+3] > MOTION_ALPHA_THRESHOLD) {
                 if (this.motionSensor.options.debug) {
-                    houghpx[i] = 255;
-                    houghpx[i+1] = 0;
+                    //houghpx[i] = 255;
+                    //houghpx[i+1] = 0;
                 }
                 points.push(
                     new MotionSensor.Pixel(
                         new MotionSensor.Vector2(x, y),
-                        new MotionSensor.Vector3(0, 0, 0)
+                        new MotionSensor.Vector3(houghpx[i], houghpx[i+1], houghpx[i+2])
                     )
                 );
             }
