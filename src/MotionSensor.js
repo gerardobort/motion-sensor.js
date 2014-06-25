@@ -47,6 +47,11 @@
             this.imageDataBuffers.push(this.canvasContext.createImageData(this.VIDEO_WIDTH, this.VIDEO_HEIGHT));
         }
 
+        if (options.testImage) {
+            this.testImage = new Image();
+            this.testImage.src = options.testImage;
+        }
+
         this.attachedEvents = {};
         this.processorConstructor = options.processor || this.constructor.Processor;
         this.performanceController = new this.constructor.PerformanceController(this);
@@ -77,7 +82,7 @@
 
     MotionSensor.prototype.updateCanvas = function () {
         var instance = this;
-        instance.canvasContext.drawImage(instance.video, 0, 0, this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
+        instance.canvasContext.drawImage(instance.testImage||instance.video, 0, 0, this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
         instance.originalImageData = instance.canvasContext.getImageData(0, 0, this.VIDEO_WIDTH, this.VIDEO_HEIGHT);
 
         // shift imageDataBuffers and store the last one

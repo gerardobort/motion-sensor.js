@@ -113,17 +113,37 @@
             var a = this.cosTable[thetaIndex];
             var b = this.sinTable[thetaIndex];
             
-            var x0 = a*rho;
-            var y0 = b*rho;
-            var x1 = x0 + 1000*-b;
-            var y1 = y0 + 1000* a;
-            var x2 = x0 - 1000*-b;
-            var y2 = y0 - 1000* a;
+            //var x0 = this.motionSensor.VIDEO_WIDTH/2 - a*rho;
+            //var y0 = b*rho;
+            //var x0 = this.numAngleCells/2 - a*rho;
+            //var y0 = this.rhoMax/2 - b*rho;
+
+            // most accurate
+            var x0 = this.motionSensor.VIDEO_WIDTH/2 - a*rho;
+            var y0 = this.motionSensor.VIDEO_HEIGHT/1.5 - 2*b*rho;
+
+            // 3:2 is the aspect ratio? - @TODO research
+            //var x0 = this.numAngleCells - 3*a*rho;
+            //var y0 = this.numAngleCells - 2*b*rho;
+
+            //var x0 = 420 - 4*a*rho;
+            //var y0 = 420 - 3*b*rho;
+
+            //var x0 = b*rho;
+            //var y0 = a*rho;
+
+            //var x0 = a*rho;
+            //var y0 = b*rho;
+            var x1 = x0 + 100*-b;
+            var y1 = y0 + 100* a;
+            var x2 = x0 - 100*-b;
+            var y2 = y0 - 100* a;
 
             return [
                 new MotionSensor.Vector2(x1, y1),
-                new MotionSensor.Vector2(x2, y2)
-            ]
+                new MotionSensor.Vector2(x2, y2),
+                new MotionSensor.Vector2(x0, y0)
+            ];
     }
 
     MotionSensor.ProcessorHough.prototype.processCircularBuffer = function (originalImageData, imageDataBuffers) {
@@ -172,6 +192,13 @@
                     this.houghAcc(x, y, newpx[i], newpx[i+1], newpx[i+2], 10, houghpx);
                 }
             //}
+
+            if (this.motionSensor.testImage && newpx[i] < 80) {
+                newpx[i] = newpx[i+1] = newpx[i+2] = 100;
+                newpx[i+1] = 200;
+                this.houghAcc(x, y, newpx[i], newpx[i+1], newpx[i+2], 1, houghpx);
+            }
+
         }
 
         for (i = 0; i < houghpx.length; i += 4) {
@@ -188,15 +215,16 @@
             }
         }
 
+        ctx.putImageData(newdata, 0, 0);
 
         if (this.motionSensor.options.debug) {
             // video canvas mark
             ctx.beginPath();
             ctx.fillStyle = '#f00';
-            ctx.fillRect(w - (this.mouseX - 2), this.mouseY - 2, 4, 4);
+            ctx.fillRect(w - this.mouseX - 2, this.mouseY - 2, 4, 4);
             ctx.closePath();
             // hough canvas line
-            this.houghAcc(this.mouseX, this.mouseY, 255, 0, 0, 100, houghpx);
+            this.houghAcc(w - this.mouseX, this.mouseY, 255, 0, 0, 100, houghpx);
         }
 
         houghctx.putImageData(houghBuffer, 0, 0);
@@ -205,7 +233,7 @@
             // hough canvas mark
             houghctx.beginPath();
             houghctx.fillStyle = '#f00';
-            houghctx.fillRect((this.houghMouseX - 2), this.houghMouseY - 2, 4, 4);
+            houghctx.fillRect(this.houghMouseX - 2, this.houghMouseY - 2, 4, 4);
             houghctx.closePath();
             // video canvas line
 
@@ -218,7 +246,11 @@
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#f00';
             ctx.stroke();
+            ctx.fillStyle = '#000';
+            ctx.fillRect((linePoints[2].x - 2), linePoints[2].y - 2, 4, 4);
         }
+
+
 
         clusters = MotionSensor.Cluster.upsertArrayFromPoints(this.clustersBuffer, points, k, this.motionSensor, 1, this.numAngleCells, this.rhoMax);
 
@@ -235,11 +267,13 @@
             if (this.clustersBuffer[j]) { // ease centroid movement by using buffering
                 cluster.centroid.x = (cluster.centroid.x + this.clustersBuffer[j].centroid.x)*.5;
                 cluster.centroid.y = (cluster.centroid.y + this.clustersBuffer[j].centroid.y)*.5;
+
             }
 
-            var clusterLinePoints = this.houghLine(cluster.centroid.y, cluster.centroid.x); 
+            var clusterLinePoints = this.houghLine(cluster.centroid.y||0, cluster.centroid.x||0); 
             cluster.p1 = clusterLinePoints[0];
             cluster.p2 = clusterLinePoints[1];
+
 
             this.clustersBuffer[j] = cluster; // update buffer
         }
