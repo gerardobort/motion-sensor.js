@@ -105,39 +105,20 @@
     // idea based on: http://liquify.eu/project/HoughTransform/
     // math calculus taken from: https://github.com/yume190/TenSha/blob/756acdf0d9562525350578eb7603f7fae63abe30/Q1/tool/OpenCV2-Python-master/Official_Tutorial_Python_Codes/3_imgproc/houghlines.py
     MotionSensor.ProcessorHough.prototype.houghLine = function (rho, theta) {
+
             rho = rho - this.rhoMax/2;
-            //theta = theta / 360 * Math.PI; 
-            //var a = -Math.cos(theta);
-            //var b = Math.sin(theta);
             var thetaIndex = Math.floor(theta);
+
             var a = this.cosTable[thetaIndex];
             var b = this.sinTable[thetaIndex];
             
-            //var x0 = this.motionSensor.VIDEO_WIDTH/2 - a*rho;
-            //var y0 = b*rho;
-            //var x0 = this.numAngleCells/2 - a*rho;
-            //var y0 = this.rhoMax/2 - b*rho;
+            var x0 = 2*a*rho;
+            var y0 = 2*b*rho;
 
-            // most accurate
-            var x0 = this.motionSensor.VIDEO_WIDTH/2 - a*rho;
-            var y0 = this.motionSensor.VIDEO_HEIGHT/1.5 - 2*b*rho;
-
-            // 3:2 is the aspect ratio? - @TODO research
-            //var x0 = this.numAngleCells - 3*a*rho;
-            //var y0 = this.numAngleCells - 2*b*rho;
-
-            //var x0 = 420 - 4*a*rho;
-            //var y0 = 420 - 3*b*rho;
-
-            //var x0 = b*rho;
-            //var y0 = a*rho;
-
-            //var x0 = a*rho;
-            //var y0 = b*rho;
-            var x1 = x0 + 100*-b;
-            var y1 = y0 + 100* a;
-            var x2 = x0 - 100*-b;
-            var y2 = y0 - 100* a;
+            var x1 = x0 + 1000*-b;
+            var y1 = y0 + 1000* a;
+            var x2 = x0 - 1000*-b;
+            var y2 = y0 - 1000* a;
 
             return [
                 new MotionSensor.Vector2(x1, y1),

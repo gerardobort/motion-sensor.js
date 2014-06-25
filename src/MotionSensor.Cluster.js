@@ -28,7 +28,7 @@
             jMin = 0,
             clusters = [],
             step = 0,
-            maxSteps = 3,
+            maxSteps = 4,
             maxDelta = 70,
             w = VIDEO_WIDTH = w || motionSensor.VIDEO_WIDTH,
             h = VIDEO_HEIGHT = h || motionSensor.VIDEO_HEIGHT;
