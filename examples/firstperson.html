@@ -9,6 +9,7 @@
         <h1>First Person Research</h1>
         <div>
             <code id="fps-log"></code>
+            <div id="message-log">hello</div>
         </div>
 
         <script src="../src/MotionSensor.js"></script>
@@ -23,17 +24,20 @@
         <script src="../src/MotionSensor.ConvexHull.js"></script>
 
         <style>
+            body { background: #000; }
             #fps-log { position: absolute; top: 10px; left: 10px; color: #0f0; z-index: 2; font-size: 20px; }
-            canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:100%; height: 100%; }
+            canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width:50%; height: 100%; }
+            #message-log { position: absolute; top: 50%; left: 50%; right: 0; text-align: center; font-size: 30px; color: #0f0; font-family: courier; }
         </style>
 
         <script>
             var fpsLogElement = document.getElementById('fps-log');
+            var messageLogElement = document.getElementById('message-log');
 
             var motionSensor = new MotionSensor({
-                initialScale: .5,
+                initialScale: .3,
                 totalBuffers: 3,
-                totalClusters: 1,
+                //totalClusters: 2,
                 fpsControlEnabled: false,
                 useDatGui: false,
                 processor: MotionSensor.ProcessorFirstPerson,
@@ -43,6 +47,7 @@
             });
 
             motionSensor.on('start', function (canvas, context) {
+                
             });
 
             motionSensor.on('fps:change', function (fps, scale) {
@@ -78,17 +83,33 @@
                     context.strokeStyle = cluster.debugColor;
                     context.stroke();
                 });
-
-                // having 2 clusters defined, draw a line that connects them
-                if (clusters[0] && clusters[1]) {
-                    context.beginPath();
-                    context.moveTo(clusters[0].centroid.x, clusters[0].centroid.y);
-                    context.lineTo(clusters[1].centroid.x, clusters[1].centroid.y);
-                    context.closePath();
-                    context.lineWidth = 2;
-                    context.strokeStyle = '#000';
-                    context.stroke();
+                
+                if (clusters[0].versor.y < 0 && clusters[1].versor.y > 0) {
+                    messageLogElement.innerText = 'forward';
+                } else if (clusters[0].versor.y > 0 && clusters[1].versor.y < 0) {
+                    messageLogElement.innerText = 'back...';
+                } else {
+                    messageLogElement.innerText = '.......';
                 }
+
+                messageLogElement.innerText += ' | ';
+                if (clusters[0].versor.y < 0 && clusters[1].versor.y < 0) {
+                    messageLogElement.innerText += 'up.....';
+                } else if (clusters[0].versor.y > 0 && clusters[1].versor.y > 0) {
+                    messageLogElement.innerText += 'down...';
+                } else {
+                    messageLogElement.innerText += '.......';
+                }
+
+                messageLogElement.innerText += ' | ';
+                if (clusters[0].versor.x < 0 && clusters[1].versor.x < 0) {
+                    messageLogElement.innerText += 'left...';
+                } else if (clusters[0].versor.x > 0 && clusters[1].versor.x > 0) {
+                    messageLogElement.innerText += 'right..';
+                } else {
+                    messageLogElement.innerText += '.......';
+                }
+    
             });
 
             motionSensor.start();
