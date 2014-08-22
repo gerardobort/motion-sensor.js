@@ -51,6 +51,10 @@
             this.testImage = new Image();
             this.testImage.src = options.testImage;
         }
+        if (options.testVideo) {
+            this.testVideo = document.createElement('video');
+            this.testVideo.src = options.testVideo;
+        }
 
         this.attachedEvents = {};
         this.processorConstructor = options.processor || this.constructor.Processor;
@@ -62,18 +66,33 @@
 
         instance.processor = new instance.processorConstructor(instance);
 
-        navigator.getUserMedia({ video: true },
-            function (stream) {
-                // replace with another video source if needed
-                instance.video.src = webkitURL.createObjectURL(stream);
-                webkitRequestAnimationFrame(instance.updateCanvas.bind(instance));
-                console.log('MotionSensor started.');
-                instance.trigger('start', [instance.canvas, instance.canvasContext])
-            },
-            function () {
-                throw 'MotionSensor error during webcam initialization.';
-            }
-        );
+        if (!instance.testImage && !instance.testVideo) {
+            navigator.getUserMedia({ video: true },
+                function (stream) {
+                    // replace with another video source if needed
+                    instance.video.src = webkitURL.createObjectURL(stream);
+                    webkitRequestAnimationFrame(instance.updateCanvas.bind(instance));
+                    console.log('MotionSensor started.');
+                    instance.trigger('start', [instance.canvas, instance.canvasContext])
+                },
+                function () {
+                    throw 'MotionSensor error during webcam initialization.';
+                }
+            );
+        } else if (this.testVideo) {
+            instance.video = instance.testVideo;
+            var body = document.getElementsByTagName('body')[0];
+            body.appendChild(instance.video);
+            instance.video.volume = 0;
+            instance.canvas.style.webkitTransform = '';
+            body.onclick = function () {
+                instance.video.paused ? instance.video.play() : instance.video.pause();
+            };
+            instance.video.play();
+            webkitRequestAnimationFrame(instance.updateCanvas.bind(instance));
+            console.log('MotionSensor started.');
+            instance.trigger('start', [instance.canvas, instance.canvasContext])
+        }
     };
 
     MotionSensor.prototype.setScale = function (scale) {
