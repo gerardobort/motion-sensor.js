@@ -1,5 +1,9 @@
 ;(function (window, document) {
 
+    if ('https:' !== window.location.protocol && window.location.host.match(/github\.io/)) {
+        window.location.protocol = 'https:';
+    }
+
     navigator.getUserMedia = (
         navigator.getUserMedia
         || navigator.webkitGetUserMedia
